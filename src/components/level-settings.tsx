@@ -1,7 +1,7 @@
 import { useGameEngine } from '../game-engine';
-import { ALL_BLINDS, BREAK_TIMES, ROUND_TIMES } from '../utils';
+import { ALL_BLINDS, BREAK_TIMES, LEVEL_TIMES } from '../utils';
 
-export function RoundSettings() {
+export function LevelSettings() {
   const engine = useGameEngine()
 
   const handleClose = (evt) => {
@@ -9,13 +9,13 @@ export function RoundSettings() {
     engine.toggleSettings()
   };
 
-  const setRoundTime = (evt)=>{
+  const setLevelTime = (evt)=>{
     const minutes = parseInt(evt.target.value, 10);
-    engine.setRoundDurationSeconds(minutes * 60);
+    engine.setLevelDurationSeconds(minutes * 60);
   }
 
   const setBlinds = (evt: React.ChangeEvent<HTMLSelectElement>) => {
-    engine.setStartingChips(parseInt(evt.target.value, 10));
+    engine.setStartingBlind(parseInt(evt.target.value, 10));
   }
 
   const setBreakTime = (evt: React.ChangeEvent<HTMLSelectElement>) => {
@@ -40,12 +40,12 @@ export function RoundSettings() {
         </div>
 
         <div className="settings-panel-control">
-          <h3>Round time</h3>
+          <h3>Level time</h3>
           <select
-            onChange={setRoundTime}
-            defaultValue={engine.roundDurationSeconds / 60}
+            onChange={setLevelTime}
+            defaultValue={engine.levelDurationSeconds / 60}
           >
-            {ROUND_TIMES.map((time) => (
+            {LEVEL_TIMES.map((time) => (
               <option key={time} value={time}>
                 {time}
               </option>

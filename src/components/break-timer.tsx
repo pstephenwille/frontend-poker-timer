@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent } from 'react';
-import { formatTimeMMSS, pauseBetweenRounds, playAudio } from '../utils';
+import { formatTimeMMSS, runAfterDelay, playAudio } from '../utils';
 import { useGameEngine } from '../game-engine';
 import { useCountdown } from '../hooks/use-countdown';
 
@@ -18,7 +18,7 @@ export const BreakTimer = ({ breakDurationSeconds }) => {
     onComplete: soundBreakEndHorn,
   });
 
-  useEffect(function keepRoundClockPausedForWholeBreak() {
+  useEffect(function keepLevelClockPausedForWholeBreak() {
     if (hasGameStarted) setGameIsRunning(false)
   }, [hasGameStarted, setGameIsRunning])
 
@@ -27,7 +27,7 @@ export const BreakTimer = ({ breakDurationSeconds }) => {
   useEffect(function resumePlayShortlyAfterBreakHorn() {
     if (!countdown.isFinished) return;
 
-    const timeoutId = pauseBetweenRounds(PAUSE_AFTER_BREAK_HORN_MILLIS, endBreak)
+    const timeoutId = runAfterDelay(PAUSE_AFTER_BREAK_HORN_MILLIS, endBreak)
 
     return () => clearTimeout(timeoutId)
   }, [countdown.isFinished])

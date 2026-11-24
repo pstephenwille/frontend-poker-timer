@@ -118,3 +118,5 @@ These are UI states, not domain terms, so they stay out of `GLOSSARY.md`.
 ## Status
 
 Session 4 (2026-11-24) designed slices 2 and 3, sign-in and recording a Tournament (Decisions 23–35). Slice 4, profile and avatar (including the `/me` page's contents), and the admin UI remain undesigned. Next step is implementation, starting with step 1 of Decision 21.
+
+Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds) was skipped, so slice 4 is still undesigned. Step 1 of Decision 21 is implemented on branch `refactor/round-to-level`. Next is step 2, the backend contracts major release.

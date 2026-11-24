@@ -1,5 +1,5 @@
 import { BreakTimer } from './break-timer';
-import { RoundSettings } from './round-settings';
+import { LevelSettings } from './level-settings';
 import { useGameEngine } from '../game-engine';
 
 export function Header() {
@@ -11,7 +11,7 @@ export function Header() {
         <div className="controls">
           <button onClick={engine.startPokerGame}>{engine.gameIsRunning? 'Pause': 'Start'}</button>
           <button onClick={engine.resetGame}>Reset</button>
-          <button onClick={engine.toggleBreakIsActive}>
+          <button onClick={engine.toggleBreakIsActive} disabled={!engine.hasGameStarted}>
             {engine.breakIsActive? 'End Break' : 'Take Break'}
           </button>
           <button id={'toggleSettingsButton'} onClick={engine.toggleSettings}>
@@ -28,7 +28,7 @@ export function Header() {
       )}
 
       {engine.isSettingsOpen &&
-          <RoundSettings />
+          <LevelSettings />
       }
     </>
 

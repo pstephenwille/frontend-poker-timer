@@ -1,65 +1,65 @@
 import { useEffect, useEffectEvent, useMemo } from 'react';
 import {
   formatTimeMMSS,
-  pauseBetweenRounds,
+  runAfterDelay,
   playAudio,
   startConfettiCelebration,
 } from '../utils';
 import { useGameEngine } from '../game-engine';
 import { useCountdown } from '../hooks/use-countdown';
 
-const PAUSE_BETWEEN_ROUNDS_MILLIS = 3_000;
-const SMALL_BLIND_THAT_RETIRES_LOWEST_CHIPS = 25;
+const PAUSE_BETWEEN_LEVELS_MILLIS = 3_000;
+const SMALL_BLIND_THAT_RETIRES_LOWEST_CHIPS = 15;
 
-const getBlindForRound = (blinds, round) => blinds[round] ?? blinds.at(-1);
+const getBlindForLevel = (blinds, level) => blinds[level] ?? blinds.at(-1);
 
-const isColorUpDue = (completedRound, completedBlind) => {
-  const isOpeningRound = completedRound === 0;
+const isColorUpBreakDue = (completedLevel, completedBlind) => {
+  const isOpeningLevel = completedLevel === 0;
   const retiresLowestChips = completedBlind?.small === SMALL_BLIND_THAT_RETIRES_LOWEST_CHIPS;
 
-  return !isOpeningRound && retiresLowestChips;
+  return !isOpeningLevel && retiresLowestChips;
 };
 
-export const RoundTimer = () => {
+export const LevelTimer = () => {
   const engine = useGameEngine()
-  const currentBlind = getBlindForRound(engine.blinds, engine.currentRound)
+  const currentBlind = getBlindForLevel(engine.blinds, engine.currentLevel)
   const [smallBlind, bigBlind] = useBlindsDisplayHook(currentBlind)
 
-  const celebrateRoundEnd = () => {
+  const celebrateLevelEnd = () => {
     startConfettiCelebration();
-    playAudio(engine.roundEndAudioRef, engine.isAudioEnabled);
+    playAudio(engine.levelEndAudioRef, engine.isAudioEnabled);
   };
 
   const countdown = useCountdown({
-    durationSeconds: engine.roundDurationSeconds,
+    durationSeconds: engine.levelDurationSeconds,
     isRunning: engine.gameIsRunning,
-    onComplete: celebrateRoundEnd,
+    onComplete: celebrateLevelEnd,
   });
 
-  const isPausedBetweenRounds = engine.gameIsRunning && countdown.isFinished;
+  const isPausedBetweenLevels = engine.gameIsRunning && countdown.isFinished;
 
-  const startColorUpBreakIfDue = (completedRound, completedBlind) => {
-    if (isColorUpDue(completedRound, completedBlind)) {
+  const startColorUpBreakIfDue = (completedLevel, completedBlind) => {
+    if (isColorUpBreakDue(completedLevel, completedBlind)) {
       engine.toggleBreakIsActive(true)
     }
   }
 
-  const advanceToNextRound = useEffectEvent(() => {
-    const completedRound = engine.currentRound
+  const advanceToNextLevel = useEffectEvent(() => {
+    const completedLevel = engine.currentLevel
     const completedBlind = currentBlind
 
     countdown.reset()
-    engine.incrementCurrentRound()
-    startColorUpBreakIfDue(completedRound, completedBlind)
+    engine.incrementCurrentLevel()
+    startColorUpBreakIfDue(completedLevel, completedBlind)
   });
 
-  useEffect(function advanceAfterPauseBetweenRounds() {
-    if (!isPausedBetweenRounds) return;
+  useEffect(function advanceAfterPauseBetweenLevels() {
+    if (!isPausedBetweenLevels) return;
 
-    const timeoutId = pauseBetweenRounds(PAUSE_BETWEEN_ROUNDS_MILLIS, advanceToNextRound)
+    const timeoutId = runAfterDelay(PAUSE_BETWEEN_LEVELS_MILLIS, advanceToNextLevel)
 
     return () => clearTimeout(timeoutId)
-  }, [isPausedBetweenRounds])
+  }, [isPausedBetweenLevels])
 
 
   return (
@@ -71,7 +71,7 @@ export const RoundTimer = () => {
 
         <div className="time-remaining">
           <p className={'current-level'}>
-            Round: {engine.currentRound + 1}
+            Level: {engine.currentLevel + 1}
           </p>
           <h2>{formatTimeMMSS(countdown.remainingSeconds)}</h2>
         </div>

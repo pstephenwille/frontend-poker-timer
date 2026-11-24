@@ -1,35 +1,35 @@
 import { createContext, useContext, useReducer, useState } from 'react';
-import { ALL_BLINDS, DEFAULT_BREAK_SECONDS, DEFAULT_ROUND_SECONDS, initializeBlindsForNewGame } from './utils';
+import { ALL_BLINDS, DEFAULT_BREAK_SECONDS, DEFAULT_LEVEL_SECONDS, initializeBlindsForNewGame } from './utils';
 
 
 const booleanToggleReducer = (current: boolean, override?: unknown): boolean => typeof override === 'boolean' ? override
   : !current;
 
 export type AudioRefs = {
-  roundEndAudioRef: React.RefObject<HTMLAudioElement | null>;
+  levelEndAudioRef: React.RefObject<HTMLAudioElement | null>;
   breakEndAudioRef: React.RefObject<HTMLAudioElement | null>;
 };
 
-export function usePokerGameEngine({ roundEndAudioRef, breakEndAudioRef }: AudioRefs) {
+export function usePokerGameEngine({ levelEndAudioRef, breakEndAudioRef }: AudioRefs) {
   const [hasGameStarted, setGameHasStarted] = useState(false)
   const [gameIsRunning, setGameIsRunning] = useReducer(booleanToggleReducer, false);
   const [resetGameToggled, toggleGameReset] = useReducer(booleanToggleReducer, false);
   const [isSettingsOpen, toggleSettings] = useReducer(booleanToggleReducer, false);
   const [breakIsActive, toggleBreakIsActive] = useReducer(booleanToggleReducer, false);
   const [isAudioEnabled, toggleAudio] = useReducer(booleanToggleReducer, true);
-  const [currentRound, incrementCurrentRound] = useReducer((roundCount: number, override?: number) => (
+  const [currentLevel, incrementCurrentLevel] = useReducer((levelCount: number, override?: number) => (
     Number.isInteger(override)
   ) ? override
-    : roundCount + 1, 0);
+    : levelCount + 1, 0);
   const [blinds, setBlinds] = useState(ALL_BLINDS);
-  const [roundDurationSeconds, setRoundDurationSeconds] = useState(DEFAULT_ROUND_SECONDS);
+  const [levelDurationSeconds, setLevelDurationSeconds] = useState(DEFAULT_LEVEL_SECONDS);
   const [breakDurationSeconds, setBreakDurationSeconds] = useState(DEFAULT_BREAK_SECONDS);
 
   const resetGame = () => {
     toggleGameReset()
     setGameIsRunning(false);
-    incrementCurrentRound(0);
-    setRoundDurationSeconds(DEFAULT_ROUND_SECONDS)
+    incrementCurrentLevel(0);
+    setLevelDurationSeconds(DEFAULT_LEVEL_SECONDS)
     setBreakDurationSeconds(DEFAULT_BREAK_SECONDS)
     setGameHasStarted(false)
   };
@@ -53,14 +53,14 @@ export function usePokerGameEngine({ roundEndAudioRef, breakEndAudioRef }: Audio
     gameIsRunning,
     isSettingsOpen,
     isAudioEnabled,
-    currentRound,
+    currentLevel,
     blinds,
-    roundDurationSeconds,
+    levelDurationSeconds,
     breakDurationSeconds,
     breakIsActive,
     resetGameToggled,
     hasGameStarted,
-    roundEndAudioRef,
+    levelEndAudioRef,
     breakEndAudioRef,
   };
 
@@ -73,10 +73,10 @@ export function usePokerGameEngine({ roundEndAudioRef, breakEndAudioRef }: Audio
     setGameIsRunning,
     toggleSettings,
     toggleAudio,
-    incrementCurrentRound,
-    setRoundDurationSeconds,
+    incrementCurrentLevel,
+    setLevelDurationSeconds,
     setBreakDurationSeconds,
-    setStartingChips: (chips: number) => setBlinds(initializeBlindsForNewGame(chips)),
+    setStartingBlind: (startingBlind: number) => setBlinds(initializeBlindsForNewGame(startingBlind)),
     resetGame,
   };
 

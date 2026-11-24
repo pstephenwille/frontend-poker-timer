@@ -34,6 +34,22 @@ _Avoid_: Colour-up (spelling), color-up round, chip-up
 One of the four rounds of betting within a Hand: pre-flop, flop, turn and river.
 _Avoid_: Round (unqualified), street
 
+**Member**:
+A person with an account, which makes them part of the group; only Members can be recorded as playing.
+_Avoid_: User, player (when meaning someone with an account), account
+
+**Register**:
+To become a Member by signing in for the first time; it is done once, not for each Tournament.
+_Avoid_: Sign up, join, enrol
+
+**Host**:
+The Member who runs the timer at the table and records each Tournament when it ends.
+_Avoid_: Admin (a separate role), dealer, organiser
+
+**Participant**:
+A Member who played in a given Tournament; every recorded Tournament has at least two.
+_Avoid_: Player (when meaning a recorded entrant), entrant, guest
+
 ### Outcome
 
 **Winner**:

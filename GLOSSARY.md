@@ -22,9 +22,13 @@ _Avoid_: Round, blind period, hand
 The small blind of the opening Level, chosen before the Tournament starts.
 _Avoid_: Starting chips, starting stack
 
-**Colour-up Break**:
+**Break**:
+A rest from play of a set length, taken only once the Tournament has started, during which the Level's clock is stopped; it cannot be paused, only ended early, and when it ends play always resumes.
+_Avoid_: Pause, intermission
+
+**Color-up Break**:
 The automatic Break after the Level whose small blind is 15, unless that is the opening Level, when the lowest-value chips are exchanged for higher ones.
-_Avoid_: Color-up round, chip-up
+_Avoid_: Colour-up (spelling), color-up round, chip-up
 
 **Betting Round**:
 One of the four rounds of betting within a Hand: pre-flop, flop, turn and river.
@@ -56,9 +60,17 @@ _Avoid_: Prize, purse, payout, winnings (for a single Tournament)
 The money a player puts in to play a Tournament; together the Buy-ins make up the Pot.
 _Avoid_: Entry fee, stake
 
+**Last Winner**:
+The Winner of the most recently played Tournament, honoured for that one win until the next Tournament is recorded.
+_Avoid_: Reigning Champion, latest champion, defending champ
+
+**Leaderboard**:
+Every member ranked by number of wins, with equal win counts separated by the strength of their Winning Hands, newest first, and any remaining tie going to the member who won most recently.
+_Avoid_: Standings, rankings, scoreboard
+
 **Reigning Champion**:
-The Winner of the most recently played Tournament, honoured on the main screen until the next Tournament is recorded.
-_Avoid_: Leader, last winner, defending champ
+The member ranked first on the Leaderboard; it is a standing earned over many Tournaments, not a single win.
+_Avoid_: Last Winner, leader, top player
 
 ## Flagged ambiguities
 

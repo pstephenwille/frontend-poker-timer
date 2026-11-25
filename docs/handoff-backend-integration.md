@@ -166,7 +166,7 @@ Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7 and sett
   - PR 4, the new Winner highlighted after a save: #25.
   - PR 5, the photo: #26.
   - PR 6, End Tournament: #27.
-  - PR 7, registering at the table, with the placeholder `/me`: open as of the end of session 7.
+  - PR 7, registering at the table, with the placeholder `/me`: #28, open as of the end of session 7.
 - **Decisions 40 and 41** (session 7): the QR code is drawn with `qrcode.react`; `/me` is a placeholder until slice 4.
 
 ### Choices made while building slice 3, for review
@@ -180,7 +180,7 @@ Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7 and sett
 
 ### Next
 
-1. **Review and merge slice 3 PR 7.**
+1. **Review and merge slice 3 PR 7 (#28).**
 2. **The backend change for Decision 36,** a backend PR that can go in any time. Until it ships, a recorder who isn't a Participant sees "You can only record a tournament you played in".
 3. **Deploy slice 3 to `dev` and check it there** (see **Deploying the frontend by hand**). Photo uploads can't be checked from `pnpm dev`, because the media bucket's CORS allows only the stage's own origin. Check:
    - End Tournament, then recording with a photo, lands on the Leaderboard with the Winner highlighted.

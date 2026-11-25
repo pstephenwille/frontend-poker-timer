@@ -1,6 +1,6 @@
 # Handoff: building the frontend on the backend
 
-Status as of 2026-11-25, after session 7. Slices 1 and 2 are merged, deployed to `dev` and checked against the real backend. Slice 3 is built, with its last PR open, but not yet deployed or tried against the real backend; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
+Status as of 2026-11-25, after session 7. Slices 1 and 2 are merged, deployed to `dev` and checked against the real backend. Slice 3 is merged and deployed to `dev`, but not yet checked against the real backend; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
 
 To reopen the design, run `/mattpocock-skills:grill-with-docs` and point it at this file. Ask questions **one at a time**, each with a recommended answer, and record each answer here and in `GLOSSARY.md` as soon as it is given. The backend repo (`../backend-poker-timer`) is read only for facts; this repo is where the design lives.
 
@@ -157,7 +157,7 @@ Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7 and sett
   - Passed: Sign out is disabled while a game runs and is enabled again after Reset.
   - Skipped both times: cancelling at Google shows "Sign-in was cancelled." It's still unchecked anywhere. Google shows Cancel only on its consent screen, which it skips once consent is given; use a private window or remove the app at https://myaccount.google.com/connections to see it.
 - **Backend PR #22 (`local-frontend-origin`)** merged as `69c7cb4`, and its Deliver run redeployed `dev` and `prod`.
-- **The frontend is on `dev`** from master at `526b16f` (see **Deploying the frontend by hand**).
+- **The frontend is on `dev`** from master at `7b6882f`, with all of slice 3 (see **Deploying the frontend by hand**).
 - **Decisions 36–39** (session 6): any Member can record; the Winner is what matters and Participants are bookkeeping; Participants start unchecked; the Pot starts empty.
 - **Slice 3 (recording a Tournament)**, one PR per task of the **Slice 3 plan**:
   - PR 1, the Record page: #21.
@@ -166,7 +166,7 @@ Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7 and sett
   - PR 4, the new Winner highlighted after a save: #25.
   - PR 5, the photo: #26.
   - PR 6, End Tournament: #27.
-  - PR 7, registering at the table, with the placeholder `/me`: #28, open as of the end of session 7.
+  - PR 7, registering at the table, with the placeholder `/me`: #28.
 - **Decisions 40 and 41** (session 7): the QR code is drawn with `qrcode.react`; `/me` is a placeholder until slice 4.
 
 ### Choices made while building slice 3, for review
@@ -180,15 +180,14 @@ Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7 and sett
 
 ### Next
 
-1. **Review and merge slice 3 PR 7 (#28).**
-2. **The backend change for Decision 36,** a backend PR that can go in any time. Until it ships, a recorder who isn't a Participant sees "You can only record a tournament you played in".
-3. **Deploy slice 3 to `dev` and check it there** (see **Deploying the frontend by hand**). Photo uploads can't be checked from `pnpm dev`, because the media bucket's CORS allows only the stage's own origin. Check:
+1. **Check slice 3 on `dev`,** where it was deployed on 2026-11-25 from `7b6882f`. Recording writes a real Tournament to `dev`'s Leaderboard. Photo uploads can't be checked from `pnpm dev`, because the media bucket's CORS allows only the stage's own origin. Check:
    - End Tournament, then recording with a photo, lands on the Leaderboard with the Winner highlighted.
    - The photo appears on the Tournament, including one taken on an iPhone (some browsers give `.heic` files no type, which the form would refuse).
    - Scanning the QR code with a phone registers and lands on `/me`, and the new Member appears on the form when the timer's window is focused again.
    - The six timer buttons wrap sensibly on a narrow screen.
-4. **Then deploy to `prod` and run backend task 14.3** through the real UI.
-5. **Slice 4 (profile and avatar) and the admin UI** still need designing. Slice 4 replaces the placeholder `/me`, and adds Me to the account menu (Decision 33).
+2. **The backend change for Decision 36,** a backend PR that can go in any time. Until it ships, a recorder who isn't a Participant sees "You can only record a tournament you played in", so check yourself as a Participant when recording on `dev`.
+3. **Then deploy to `prod` and run backend task 14.3** through the real UI.
+4. **Slice 4 (profile and avatar) and the admin UI** still need designing. Slice 4 replaces the placeholder `/me`, and adds Me to the account menu (Decision 33).
 
 ### Running the frontend against a personal stage
 
@@ -251,7 +250,7 @@ Credentials for AWS account `512808912517` are needed in the environment, export
 
 The SST Router's CloudFront origin is `placeholder.sst.dev`, not the bucket, so find the bucket by name with `aws s3api list-buckets` instead. For `dev`, the bucket is `poker-timer-dev-frontendbucket-htazhobe` and the distribution is `E1J1N6X6GCOF47`.
 
-On 2026-11-25 the frontend was deployed to `dev` from master at `526b16f`. Nothing has been uploaded to `prod` yet.
+On 2026-11-25 the frontend was deployed to `dev` from master at `7b6882f`, with all of slice 3, replacing the `526b16f` build. Nothing has been uploaded to `prod` yet.
 
 ### Setting up a new machine
 

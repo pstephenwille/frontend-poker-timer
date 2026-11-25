@@ -107,6 +107,33 @@ body {
     align-items: center;
     gap: 2rem;
 
+    .account-menu {
+        position: relative;
+    }
+
+    .signed-in-member {
+        padding: 0;
+        background: none;
+        box-shadow: none;
+        border-radius: 50%;
+    }
+
+    .account-menu-items {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 0.5rem);
+        z-index: 10;
+        padding: 0.5rem;
+        background-color: var(--card-bg);
+        border-radius: 8px;
+        box-shadow: 3px 7px 11px 1px black;
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+    }
+
     .signed-in-member .member-avatar {
         width: 2.5rem;
         height: 2.5rem;

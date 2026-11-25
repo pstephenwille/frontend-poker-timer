@@ -2,7 +2,8 @@ import { me as ann } from '@pstephenwille/poker-timer-contracts/fixtures';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
-import { failMe, renderApp, serveLeaderboard, signIn } from '../testing/render-app';
+import { failMe, serveLeaderboard, signIn } from '../testing/fake-backend';
+import { renderApp } from '../testing/render-app';
 
 const SIGN_IN_LOCKED_HINT = 'Sign in after the game';
 const ACCOUNT_CHECK_FAILED = 'Your account could not be checked';
@@ -20,7 +21,7 @@ describe('the header account area', () => {
 
     renderApp();
 
-    expect(await screen.findByRole('img', { name: 'Signed in as Ann.AllIn' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Signed in as Ann.AllIn' })).toBeInTheDocument();
     expect(screen.queryByText('Sign in')).not.toBeInTheDocument();
   });
 
@@ -49,6 +50,6 @@ describe('the header account area', () => {
 
     await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith(ACCOUNT_CHECK_FAILED, expect.any(Error)));
     expect(screen.queryByText('Sign in')).not.toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: /Signed in as/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Signed in as/ })).not.toBeInTheDocument();
   });
 });

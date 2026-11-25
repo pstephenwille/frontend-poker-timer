@@ -1,7 +1,8 @@
 import { screen, within } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 import { leaderboardEntry } from '../testing/leaderboard-entries';
-import { failLeaderboard, renderApp, serveLeaderboard } from '../testing/render-app';
+import { failLeaderboard, serveLeaderboard } from '../testing/fake-backend';
+import { renderApp } from '../testing/render-app';
 
 const JUNE_6_NOON_UTC = Date.UTC(2026, 5, 6, 12);
 const JUNE_13_NOON_UTC = Date.UTC(2026, 5, 13, 12);

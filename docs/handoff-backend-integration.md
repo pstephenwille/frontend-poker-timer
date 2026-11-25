@@ -128,7 +128,7 @@ Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds)
   - `finalHandOpponentIds`, `lastWonAt`, the most-recent-win tiebreak and distinct ranks.
   - The column rename, with ADR `docs/adr/0001-rename-opponent-column-in-one-migration.md` in the backend.
   - Openspec tasks 16.1–16.3.
-  - Merged as backend PR #21. It's published to GitHub Packages and deployed to `dev`. `prod`'s deploy waits for approval under **Actions → Deliver**.
+  - Merged as backend PR #21. It's published to GitHub Packages and deployed to `dev` and `prod`.
 - **Slice 1 (read-only Leaderboard):** PRs #6–#11.
   - Vitest and the contracts package.
   - `pickHonors`.

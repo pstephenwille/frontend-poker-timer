@@ -47,7 +47,7 @@ The Member who runs the timer at the table and records each Tournament when it e
 _Avoid_: Admin (a separate role), dealer, organizer
 
 **Participant**:
-A Member who played in a given Tournament; every recorded Tournament has at least two.
+A Member who played in a given Tournament; the Winner always is one, and the others are optional when recording.
 _Avoid_: Player (when meaning a recorded entrant), entrant, guest
 
 ### Outcome

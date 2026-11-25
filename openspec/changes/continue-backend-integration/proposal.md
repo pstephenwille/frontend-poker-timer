@@ -18,10 +18,11 @@ The frontend has its first three slices of the backend integration built, merged
 ### New Capabilities
 
 - `account-menu`: what the signed-in Member's menu in the header offers.
+- `member-profile`: what `/me` shows and lets the Member change (Decisions 42–45).
 
-Slice 4's and the admin UI's capabilities are added here once they are designed.
+The admin UI's capabilities are added here once it is designed.
 
 ## Impact
 
 - `prod` serves the frontend for the first time, replacing SST's placeholder page.
-- Slice 4 uses the backend's existing `/api/me`, avatar and member routes; any backend change it needs is found while designing it.
+- Slice 4 uses the backend's existing `/api/me`, avatar and member routes, plus one backend change: `Me` gains `avatarStatus`, released as contracts 1.1.0 (Decision 43).

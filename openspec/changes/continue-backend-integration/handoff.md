@@ -7,7 +7,8 @@ Status as of 2026-11-25, after session 8, for picking up on another machine or i
 - **Slices 1–3 are built, merged and checked on `dev`:** the read-only Leaderboard, sign-in and sign-out, and recording a Tournament.
 - **The frontend is on `dev`** from `master` at `7b6882f`, and **on `prod`** from `master` at `cc64bef` (task 1.1). The app code is the same in both; only docs changed between them.
 - **The backend** is at `6ccec59` on `dev` and `prod`, with contracts `1.0.0`, and lets any Member record (Decision 36). Its change `add-mvp-backend` has two open tasks: 14.1 (custom domain) and 14.3 (the `prod` check through this UI).
-- **Next:** task 1.2, backend task 14.3, checking `prod` through this UI.
+- **Slice 4 is designed** (Decisions 42–45, the `member-profile` spec) and split into tasks 2.2–2.8. One needs a backend change: `avatarStatus` on `Me`, as contracts 1.1.0 (task 2.5).
+- **Next:** task 2.2, Me in the account menu. Task 1.2 (backend task 14.3) is on hold until a second Google account is available or `require-only-winner` lands.
 - **Also open:** `openspec/changes/require-only-winner`, proposed but not yet designed.
 
 ## Setting up a new machine
@@ -103,4 +104,4 @@ Against an ordinary stage, sign-in can't complete from localhost: Google returns
 - **Session 5 (2026-11-24):** opened slice 4 but skipped its first question, then built Decision 21 through slice 2.
 - **Session 6 (2026-11-25):** checked slice 2 on a personal stage and on `dev`, first deployed to `dev`, split slice 3 into seven PRs, built PR 1, and settled Decisions 36–39.
 - **Session 7 (2026-11-25):** set up a second machine, built slice 3 PRs 2–7, settled Decisions 40 and 41, deployed slice 3 to `dev` and checked it, made the backend change for Decision 36, and moved the remaining work into OpenSpec: this change and `require-only-winner`.
-- **Session 8 (2026-11-25):** deployed the frontend to `prod` (task 1.1).
+- **Session 8 (2026-11-25):** deployed the frontend to `prod` (task 1.1), put task 1.2 on hold, and designed slice 4 (Decisions 42–45, task 2.1).

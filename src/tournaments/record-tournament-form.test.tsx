@@ -24,6 +24,7 @@ import {
   save,
   tournamentsPosted,
   winnerChoice,
+  winningHandChoice,
 } from '../testing/record-tournament-form';
 
 const PLAYED_ON_WITH_SECONDS = Date.UTC(2026, 10, 24, 4, 30, 12, 345);
@@ -65,24 +66,32 @@ describe('the Participants', () => {
 });
 
 describe('the Winner', () => {
-  test('is chosen from the checked Participants only', async () => {
-    const user = openRecordForm();
+  test('is chosen from every active Member', async () => {
+    openRecordForm();
+    await participant(bob.displayName);
 
-    await user.click(await participant(bob.displayName));
-
-    expect(optionNames(winnerChoice())).toEqual(['Choose the Winner', bob.displayName]);
+    expect(optionNames(winnerChoice())).toEqual(['Choose the Winner', annMember.displayName, bob.displayName]);
   });
 
-  test('is cleared when that Participant is unchecked', async () => {
+  test('is checked as a Participant, and stays checked while they are the Winner', async () => {
     const user = openRecordForm();
-    await user.click(await participant(annMember.displayName));
-    await user.click(await participant(bob.displayName));
+    await participant(bob.displayName);
+
     await user.selectOptions(winnerChoice(), bob.displayName);
 
-    await user.click(await participant(bob.displayName));
-    await user.click(await participant(bob.displayName));
+    expect(await participant(bob.displayName)).toBeChecked();
+    expect(await participant(bob.displayName)).toBeDisabled();
+  });
 
-    expect(winnerChoice()).toHaveDisplayValue('Choose the Winner');
+  test('stays checked as a Participant after another Member becomes the Winner', async () => {
+    const user = openRecordForm();
+    await participant(bob.displayName);
+    await user.selectOptions(winnerChoice(), bob.displayName);
+
+    await user.selectOptions(winnerChoice(), annMember.displayName);
+
+    expect(await participant(bob.displayName)).toBeChecked();
+    expect(await participant(bob.displayName)).toBeEnabled();
   });
 });
 
@@ -165,39 +174,47 @@ describe('the Final Hand Opponents', () => {
     serveMembers([annMember, bob, cal]);
   });
 
-  async function checkEveryParticipantWithWinner(user: UserEvent, winnerName: string) {
-    await user.click(await participant(annMember.displayName));
-    await user.click(await participant(bob.displayName));
-    await user.click(await participant(cal.displayName));
+  async function chooseWinner(user: UserEvent, winnerName: string) {
+    await participant(winnerName);
     await user.selectOptions(winnerChoice(), winnerName);
   }
 
-  test('are chosen from the checked Participants other than the Winner', async () => {
+  test('are chosen from every active Member other than the Winner', async () => {
     const user = openRecordForm();
 
-    await checkEveryParticipantWithWinner(user, bob.displayName);
+    await chooseWinner(user, bob.displayName);
 
     expect(opponentNames()).toEqual([annMember.displayName, cal.displayName]);
   });
 
+  test('are checked as Participants, and stay checked while marked', async () => {
+    const user = openRecordForm();
+    await chooseWinner(user, bob.displayName);
+
+    await user.click(opponent(cal.displayName));
+
+    expect(await participant(cal.displayName)).toBeChecked();
+    expect(await participant(cal.displayName)).toBeDisabled();
+  });
+
+  test('stay checked as Participants once unmarked', async () => {
+    const user = openRecordForm();
+    await chooseWinner(user, bob.displayName);
+    await user.click(opponent(cal.displayName));
+
+    await user.click(opponent(cal.displayName));
+
+    expect(await participant(cal.displayName)).toBeChecked();
+    expect(await participant(cal.displayName)).toBeEnabled();
+  });
+
   test('lose a Member who becomes the Winner', async () => {
     const user = openRecordForm();
-    await checkEveryParticipantWithWinner(user, bob.displayName);
+    await chooseWinner(user, bob.displayName);
     await user.click(opponent(cal.displayName));
 
     await user.selectOptions(winnerChoice(), cal.displayName);
     await user.selectOptions(winnerChoice(), bob.displayName);
-
-    expect(opponent(cal.displayName)).not.toBeChecked();
-  });
-
-  test('lose a Participant who is unchecked', async () => {
-    const user = openRecordForm();
-    await checkEveryParticipantWithWinner(user, bob.displayName);
-    await user.click(opponent(cal.displayName));
-
-    await user.click(await participant(cal.displayName));
-    await user.click(await participant(cal.displayName));
 
     expect(opponent(cal.displayName)).not.toBeChecked();
   });
@@ -216,14 +233,13 @@ describe('the Note', () => {
 });
 
 describe('saving', () => {
-  test('needs at least two Participants and a Winner', async () => {
+  test('needs a Winner', async () => {
     const user = openRecordForm();
     await user.click(await participant(bob.displayName));
 
     await save(user);
 
     const problems = screen.getByRole('alert');
-    expect(problems).toHaveTextContent('Check at least two Participants.');
     expect(problems).toHaveTextContent('Choose the Winner.');
     expect(problems).toHaveTextContent('Choose the Winning Hand.');
     expect(tournamentsPosted()).toEqual([]);
@@ -243,6 +259,27 @@ describe('saving', () => {
     expect(JSON.parse(String(request?.body))).toEqual({
       playedOn: PLAYED_ON,
       participantIds: [annMember.id, bob.id],
+      winnerId: bob.id,
+      winningHand: 'full_house',
+      pot: 120,
+    });
+  });
+
+  test('records a Tournament with only its Winner', async () => {
+    acceptTournaments();
+    serveLeaderboard([]);
+    const user = openRecordForm();
+    await participant(bob.displayName);
+    await user.selectOptions(winnerChoice(), bob.displayName);
+    await user.selectOptions(winningHandChoice(), 'Full House');
+    await user.type(potField(), '120');
+
+    await save(user);
+
+    expect(await screen.findByRole('table', { name: 'Leaderboard' })).toBeInTheDocument();
+    expect(JSON.parse(String(tournamentsPosted()[0]?.body))).toEqual({
+      playedOn: PLAYED_ON,
+      participantIds: [bob.id],
       winnerId: bob.id,
       winningHand: 'full_house',
       pot: 120,

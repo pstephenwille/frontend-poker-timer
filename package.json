@@ -11,7 +11,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@pstephenwille/poker-timer-contracts": "1.0.0",
+    "@pstephenwille/poker-timer-contracts": "1.1.0",
     "@tsparticles/confetti": "^4.6.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.3",

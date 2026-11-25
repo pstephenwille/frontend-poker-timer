@@ -1,7 +1,6 @@
 import {
   ImageContentType,
   MAX_UPLOAD_BYTES,
-  MIN_PARTICIPANTS,
   type CreateTournament,
   type HandCategory,
 } from '@pstephenwille/poker-timer-contracts';
@@ -46,7 +45,6 @@ function playedOnProblem(playedOn: number, now: number): string | null {
 
 export function draftProblems(draft: TournamentDraft, now: number): string[] {
   const problems = [
-    draft.participantIds.length < MIN_PARTICIPANTS && 'Check at least two Participants.',
     !draft.winnerId && 'Choose the Winner.',
     !draft.winningHand && 'Choose the Winning Hand.',
     !WHOLE_DOLLARS.test(draft.pot) && 'Enter the Pot in whole dollars.',

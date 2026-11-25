@@ -146,8 +146,8 @@ Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds)
 
 1. **Try slice 2 against the real backend, signing in from `pnpm dev`.** Against an ordinary stage, sign-in can't complete from localhost: Google returns to the stage's own address, and the backend refuses a `POST` whose `Origin` is localhost. So the chosen route is a personal stage that serves localhost:
    1. **Merge or deploy backend PR `local-frontend-origin`** (backend commit `2ca0fea`, pushed but not merged on 2026-11-25). It adds `LOCAL_FRONTEND_ORIGIN`, documented in the backend `README.md` under "Serve a local frontend dev server from a personal stage". Merging also redeploys `dev` and `prod` with the same settings. Its integration tests run only in CI's PR gate, because Docker wasn't available locally.
-   2. **Check the AWS credentials** with a read-only `aws sts get-caller-identity`.
-   3. **Deploy the personal stage:** `LOCAL_FRONTEND_ORIGIN=http://localhost:3333 pnpm sst deploy --stage stephen` in the backend repo. It can run from that branch, before merging. The `stephen` stage's four SST secrets must still be set; see the backend's `handoff.md`.
+   2. **Check the AWS credentials** with a read-only `aws sts get-caller-identity`. Done on 2026-11-25: they work for user `swille` in account `512808912517`.
+   3. **Deploy the personal stage:** `LOCAL_FRONTEND_ORIGIN=http://localhost:3333 pnpm sst deploy --stage stephen` in the backend repo. It can run from that branch, before merging. The `stephen` stage's four SST secrets (`DatabaseUrl`, `GoogleClientId`, `GoogleClientSecret`, `SigninCookieKey`) were all confirmed set on 2026-11-25; see the backend's `handoff.md`.
    4. **Run the frontend against it:** `API_ORIGIN=https://dtp80nyn4zjug.cloudfront.net pnpm dev`. Use the URL `sst deploy` prints if it differs.
    5. **In Chrome or Firefox at http://localhost:3333, check that:**
       - signing in shows your avatar
@@ -170,9 +170,7 @@ The `dev` stage is https://d3qe36cyda6430.cloudfront.net, and `prod` is https://
 3. Run `aws s3 sync dist/ s3://<frontendBucket>/ --delete`. That replaces the placeholder `index.html`.
 4. Run `aws cloudfront create-invalidation --distribution-id <distributionId> --paths "/*"`.
 
-Credentials for AWS account `512808912517` are needed in the environment, exported before the editor or Claude Code starts. On the session 5 machine:
-- The AWS CLI wasn't installed, and Python had no `pip` or `venv` to install it with. Install AWS CLI v2 on the next machine.
-- The first credentials were rejected with `IncompleteSignature`. New ones were added on 2026-11-25 but not yet tried.
+Credentials for AWS account `512808912517` are needed in the environment, exported before the editor or Claude Code starts. This needs AWS CLI v2. The current machine has v2.42.3, and the credentials added on 2026-11-25 work.
 
 Nothing has been uploaded to any stage yet.
 

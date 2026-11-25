@@ -1,4 +1,5 @@
-import type { LeaderboardEntry, Me } from '@pstephenwille/poker-timer-contracts';
+import type { ErrorEnvelope, LeaderboardEntry, Me, MemberSummary } from '@pstephenwille/poker-timer-contracts';
+import { tournament } from '@pstephenwille/poker-timer-contracts/fixtures';
 import { vi } from 'vitest';
 
 type RouteResponder = () => Response;
@@ -6,6 +7,9 @@ type RouteResponder = () => Response;
 const LEADERBOARD_URL = '/api/leaderboard';
 const ME_URL = '/api/me';
 const LOGOUT_URL = '/api/auth/logout';
+const MEMBERS_URL = '/api/members';
+const TOURNAMENTS_URL = '/api/tournaments';
+const CREATED = 201;
 
 const signedOut: RouteResponder = () => Response.json({ error: { code: 'unauthorized', message: 'Sign in first' } }, { status: 401 });
 const serverError: RouteResponder = () => new Response('Bad gateway', { status: 502 });
@@ -44,6 +48,22 @@ export function serveSignOut(signOutUrl: string) {
 
 export function failSignOut() {
   responderByUrl.set(LOGOUT_URL, serverError);
+}
+
+export function serveMembers(members: MemberSummary[]) {
+  responderByUrl.set(MEMBERS_URL, () => Response.json(members));
+}
+
+export function failMembers() {
+  responderByUrl.set(MEMBERS_URL, serverError);
+}
+
+export function acceptTournaments() {
+  responderByUrl.set(TOURNAMENTS_URL, () => Response.json(tournament, { status: CREATED }));
+}
+
+export function refuseTournaments(status: number, envelope: ErrorEnvelope) {
+  responderByUrl.set(TOURNAMENTS_URL, () => Response.json(envelope, { status }));
 }
 
 export function requestsTo(url: string) {

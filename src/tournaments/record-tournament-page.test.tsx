@@ -1,8 +1,8 @@
-import { me as ann } from '@pstephenwille/poker-timer-contracts/fixtures';
+import { me as ann, members } from '@pstephenwille/poker-timer-contracts/fixtures';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, test, vi } from 'vitest';
-import { failMe, serveLeaderboard, signIn } from '../testing/fake-backend';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { failMe, serveLeaderboard, serveMembers, signIn } from '../testing/fake-backend';
 import { renderApp } from '../testing/render-app';
 
 const LEAVING_LOCKED_HINT = 'Pause the game to leave the timer';
@@ -10,6 +10,10 @@ const SIGN_IN_LOCKED_HINT = 'Sign in after the game';
 const PLAYED_ON = Date.UTC(2026, 10, 24, 4, 30);
 
 const recordForm = () => screen.findByRole('form', { name: 'Record a Tournament' });
+
+beforeEach(() => {
+  serveMembers(members);
+});
 
 describe('the Record a Tournament page', () => {
   test('signed out, it offers Sign in to record, coming back to the same URL with its playedOn', async () => {

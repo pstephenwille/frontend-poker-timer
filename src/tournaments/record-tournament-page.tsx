@@ -1,11 +1,8 @@
 import { useCurrentMember } from '../members/current-member';
 import { SignInLink } from '../members/sign-in-link';
+import { RecordTournamentForm } from './record-tournament-form';
 
 const ACCOUNT_CHECK_FAILED_MESSAGE = "Couldn't check whether you're signed in. Reload the page to try again.";
-
-function RecordTournamentForm() {
-  return <form aria-label="Record a Tournament" />;
-}
 
 function RecordTournamentContent() {
   const currentMember = useCurrentMember();

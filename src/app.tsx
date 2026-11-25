@@ -6,8 +6,9 @@ import { useEffect, useEffectEvent } from 'react';
 import { Route, Routes, useLocation } from 'react-router';
 import { LeaderboardPage } from './leaderboard/leaderboard-page';
 import { SigninErrorBanner } from './members/signin-error-banner';
-
-const TIMER_PATH = '/';
+import { CurrentMemberProvider } from './members/current-member-provider';
+import { RecordTournamentPage } from './tournaments/record-tournament-page';
+import { LEADERBOARD_PATH, RECORD_TOURNAMENT_PATH, TIMER_PATH } from './app-paths';
 
 const isTypingInFormField = (target: EventTarget | null) =>
   target instanceof HTMLInputElement
@@ -60,14 +61,17 @@ export function App() {
 
 
   return (
-    <div className="app">
-      <Header isTimerShown={isTimerShown} />
-      <SigninErrorBanner />
-      <TimerScreen isShown={isTimerShown} />
-      <Routes>
-        <Route path={TIMER_PATH} element={null} />
-        <Route path="/leaderboard" element={<LeaderboardPage />} />
-      </Routes>
-    </div>
+    <CurrentMemberProvider>
+      <div className="app">
+        <Header isTimerShown={isTimerShown} />
+        <SigninErrorBanner />
+        <TimerScreen isShown={isTimerShown} />
+        <Routes>
+          <Route path={TIMER_PATH} element={null} />
+          <Route path={LEADERBOARD_PATH} element={<LeaderboardPage />} />
+          <Route path={RECORD_TOURNAMENT_PATH} element={<RecordTournamentPage />} />
+        </Routes>
+      </div>
+    </CurrentMemberProvider>
   )
 }

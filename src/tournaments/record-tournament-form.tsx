@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { LEADERBOARD_PATH } from '../app-paths';
 import { handName } from '../leaderboard/hand-names';
+import { highlightNewWinner } from '../leaderboard/new-winner-highlight';
 import { fromLocalDateTimeInput, initialPlayedOn, toLocalDateTimeInput } from './played-on';
 import { draftProblems, toCreateTournament, type TournamentDraft } from './tournament-draft';
 import { recordTournament, TournamentRefusedError } from './tournaments-api';
@@ -106,7 +107,7 @@ function RecordTournamentFields({ members }: { members: MemberSummary[] }) {
     setIsSaving(true);
     try {
       await recordTournament(toCreateTournament(draft));
-      navigate(LEADERBOARD_PATH);
+      navigate(LEADERBOARD_PATH, { state: highlightNewWinner(draft.winnerId) });
     } catch (error) {
       setProblems([saveFailureMessage(error)]);
       setIsSaving(false);

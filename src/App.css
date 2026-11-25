@@ -499,6 +499,11 @@ button:hover {
         color: var(--gold-font-color);
     }
 
+    tr[aria-current] td {
+        background-color: rgba(197, 179, 138, 0.25);
+        font-weight: bold;
+    }
+
     .member-avatar {
         width: 2.5rem;
         height: 2.5rem;

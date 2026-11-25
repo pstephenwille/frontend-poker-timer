@@ -10,6 +10,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { LEADERBOARD_PATH } from '../app-paths';
 import { handName } from '../leaderboard/hand-names';
 import { highlightNewWinner } from '../leaderboard/new-winner-highlight';
+import { RegisterQrCode } from '../members/register-qr-code';
 import { fromLocalDateTimeInput, initialPlayedOn, toLocalDateTimeInput } from './played-on';
 import { draftProblems, toCreateTournament, type TournamentDraft } from './tournament-draft';
 import { uploadTournamentPhoto } from './photo-api';
@@ -17,6 +18,8 @@ import { recordTournament, TournamentRefusedError } from './tournaments-api';
 import { useActiveMembers } from './use-active-members';
 
 const MEMBERS_FAILED_MESSAGE = "The Members couldn't be loaded. Reload the page to try again.";
+const MEMBERS_REFRESH_FAILED_MESSAGE = "The Members couldn't be refreshed. Try Refresh again.";
+const GUESTS_CANT_BE_RECORDED = "Players without an account can't be recorded. A new player can scan the code to register on their own phone.";
 const SAVE_FAILED_MESSAGE = "The Tournament couldn't be recorded. Try again.";
 const PHOTO_FAILED_MESSAGE = "Tournament recorded. The photo didn't upload.";
 const HANDS_STRONGEST_FIRST = [...HAND_CATEGORIES].reverse();
@@ -100,7 +103,22 @@ function saveFailureMessage(error: unknown): string {
   return SAVE_FAILED_MESSAGE;
 }
 
-function RecordTournamentFields({ members }: { members: MemberSummary[] }) {
+function ParticipantListHelp({ refreshFailed, onRefresh }: { refreshFailed: boolean; onRefresh: () => void }) {
+  return (
+    <div className="participant-list-help">
+      <p>{GUESTS_CANT_BE_RECORDED}</p>
+      <button type="button" onClick={onRefresh}>Refresh</button>
+      {refreshFailed && <p role="status">{MEMBERS_REFRESH_FAILED_MESSAGE}</p>}
+      <RegisterQrCode />
+    </div>
+  );
+}
+
+function RecordTournamentFields({ members, refreshFailed, onRefreshMembers }: {
+  members: MemberSummary[];
+  refreshFailed: boolean;
+  onRefreshMembers: () => void;
+}) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [draft, setDraft] = useState<TournamentDraft>(() => ({
@@ -192,6 +210,7 @@ function RecordTournamentFields({ members }: { members: MemberSummary[] }) {
           checkedIds={draft.participantIds}
           onToggle={toggleParticipant}
         />
+        <ParticipantListHelp refreshFailed={refreshFailed} onRefresh={onRefreshMembers} />
         <label>
           Winner
           <select value={draft.winnerId} onChange={(event) => chooseWinner(event.target.value)}>
@@ -264,5 +283,11 @@ export function RecordTournamentForm() {
   if (activeMembers.status === 'loading') return <p>Loading the Members…</p>;
   if (activeMembers.status === 'failed') return <p role="alert">{MEMBERS_FAILED_MESSAGE}</p>;
 
-  return <RecordTournamentFields members={activeMembers.members} />;
+  return (
+    <RecordTournamentFields
+      members={activeMembers.members}
+      refreshFailed={activeMembers.refreshFailed}
+      onRefreshMembers={activeMembers.refresh}
+    />
+  );
 }

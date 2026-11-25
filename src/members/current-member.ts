@@ -7,6 +7,8 @@ export type CurrentMemberState =
   | { status: 'signedOut' }
   | { status: 'failed' };
 
+export const ACCOUNT_CHECK_FAILED_MESSAGE = "Couldn't check whether you're signed in. Reload the page to try again.";
+
 export const CurrentMemberContext = createContext<CurrentMemberState | null>(null);
 
 export function useCurrentMember(): CurrentMemberState {

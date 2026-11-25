@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router';
 import { useGameEngine } from '../game-engine';
+import { signInUrl } from './sign-in-url';
 
-const SIGN_IN_URL = '/api/auth/login';
 const SIGN_IN_LOCKED_HINT = 'Sign in after the game';
 
 type SignInLinkProps = {
@@ -19,7 +19,5 @@ export function SignInLink({ className, children }: SignInLinkProps) {
     return <span className={className} aria-disabled="true" title={SIGN_IN_LOCKED_HINT}>{children}</span>;
   }
 
-  const returnTo = new URLSearchParams({ returnTo: `${pathname}${search}` });
-
-  return <a className={className} href={`${SIGN_IN_URL}?${returnTo}`}>{children}</a>;
+  return <a className={className} href={signInUrl(`${pathname}${search}`)}>{children}</a>;
 }

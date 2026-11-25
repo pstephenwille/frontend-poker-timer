@@ -4,7 +4,7 @@
 
 ## 2. Backend (in ../backend-poker-timer, needs a contracts release)
 
-- [ ] 2.1 Drop the contracts' `MIN_PARTICIPANTS` from 2 to 1, keeping the Winner among the Participants (Decision 46), update the `tournament-records` spec in `add-mvp-backend` with a new task, and release the next minor contracts version after 1.1.0; verify unit tests for the cross-field rules, integration tests for `POST` and `PATCH` with only the Winner, `openspec validate add-mvp-backend --strict`, and that the release is on GitHub Packages
+- [ ] 2.1 Drop the contracts' `MIN_PARTICIPANTS` from 2 to 1, keeping the Winner among the Participants (Decision 46), update the `tournament-records` spec in `add-mvp-backend` with a new task, and release contracts 1.1.0; verify unit tests for the cross-field rules, integration tests for `POST` and `PATCH` with only the Winner, `openspec validate add-mvp-backend --strict`, and that the release is on GitHub Packages
 
 ## 3. Frontend (needs the release from 2.1)
 

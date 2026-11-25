@@ -25,4 +25,4 @@ The admin UI's capabilities are added here once it is designed.
 ## Impact
 
 - `prod` serves the frontend for the first time, replacing SST's placeholder page.
-- Slice 4 uses the backend's existing `/api/me`, avatar and member routes, plus one backend change: `Me` gains `avatarStatus`, released as contracts 1.1.0 (Decision 43).
+- Slice 4 uses the backend's existing `/api/me`, avatar and member routes, plus one backend change: `Me` gains `avatarStatus`, released as contracts 1.2.0 (Decision 43).

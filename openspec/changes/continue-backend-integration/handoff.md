@@ -7,7 +7,7 @@ Status as of 2026-11-25, after session 8, for picking up on another machine or i
 - **Slices 1–3 are built, merged and checked on `dev`:** the read-only Leaderboard, sign-in and sign-out, and recording a Tournament.
 - **The frontend is on `dev`** from `master` at `7b6882f`, and **on `prod`** from `master` at `cc64bef` (task 1.1). The app code is the same in both; only docs changed between them.
 - **The backend** is at `6ccec59` on `dev` and `prod`, with contracts `1.0.0`, and lets any Member record (Decision 36). Its change `add-mvp-backend` has two open tasks: 14.1 (custom domain) and 14.3 (the `prod` check through this UI).
-- **Slice 4 is designed** (Decisions 42–45, the `member-profile` spec) and split into tasks 2.2–2.8. One needs a backend change: `avatarStatus` on `Me`, as contracts 1.1.0 (task 2.5).
+- **Slice 4 is designed** (Decisions 42–45, the `member-profile` spec) and split into tasks 2.2–2.8. One needs a backend change: `avatarStatus` on `Me`, as contracts 1.2.0 (task 2.5).
 - **Next:** task 2.2, Me in the account menu, not yet started: no branch is pushed. The menu is `src/members/account-menu.tsx`, its tests are in `src/members/sign-out.test.tsx` and `account.test.tsx`, and the requirements are in `specs/account-menu/spec.md`. Build it test-first.
 - **On hold:** task 1.2 (backend task 14.3), until a second Google account is available or `require-only-winner` lands. `prod` has one Member and no Tournaments.
 - **To settle in task 2.3:** replacing the placeholder `/me` drops its "You're registered, <display name>. The host can now check you on the Record form." line (Decision 41). Ask whether to keep it for players arriving from the register QR code.

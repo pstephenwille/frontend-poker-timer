@@ -172,7 +172,9 @@ The `dev` stage is https://d3qe36cyda6430.cloudfront.net, and `prod` is https://
 
 Credentials for AWS account `512808912517` are needed in the environment, exported before the editor or Claude Code starts. This needs AWS CLI v2. The current machine has v2.42.3, and the credentials added on 2026-11-25 work.
 
-Nothing has been uploaded to any stage yet.
+The SST Router's CloudFront origin is `placeholder.sst.dev`, not the bucket, so find the bucket by name with `aws s3api list-buckets` instead. For `dev`, the bucket is `poker-timer-dev-frontendbucket-htazhobe` and the distribution is `E1J1N6X6GCOF47`.
+
+On 2026-11-25 the frontend was deployed to `dev` from master at `526b16f`. Nothing has been uploaded to `prod` yet.
 
 ### Setting up a new machine
 

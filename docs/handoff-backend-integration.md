@@ -144,15 +144,22 @@ Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds)
 
 ### Next
 
-1. **Deploy the frontend to `dev` and try slice 2 for real.** Sign-in can't complete from `pnpm dev`: Google returns to the stage's own address, and the backend refuses a `POST` whose `Origin` is localhost. On `dev`, check that:
-   - signing in shows your avatar
-   - Sign out ends both sessions
-   - cancelling at Google shows "Sign-in was cancelled."
-2. **Slice 3, recording a Tournament** (Decisions 23–30 and 34). It's designed; split it into one PR per task before starting. Two loose ends belong there:
+1. **Try slice 2 against the real backend, signing in from `pnpm dev`.** Against an ordinary stage, sign-in can't complete from localhost: Google returns to the stage's own address, and the backend refuses a `POST` whose `Origin` is localhost. So the chosen route is a personal stage that serves localhost:
+   1. **Merge or deploy backend PR `local-frontend-origin`** (backend commit `2ca0fea`, pushed but not merged on 2026-11-25). It adds `LOCAL_FRONTEND_ORIGIN`, documented in the backend `README.md` under "Serve a local frontend dev server from a personal stage". Merging also redeploys `dev` and `prod` with the same settings. Its integration tests run only in CI's PR gate, because Docker wasn't available locally.
+   2. **Check the AWS credentials** with a read-only `aws sts get-caller-identity`.
+   3. **Deploy the personal stage:** `LOCAL_FRONTEND_ORIGIN=http://localhost:3333 pnpm sst deploy --stage stephen` in the backend repo. It can run from that branch, before merging. The `stephen` stage's four SST secrets must still be set; see the backend's `handoff.md`.
+   4. **Run the frontend against it:** `API_ORIGIN=https://dtp80nyn4zjug.cloudfront.net pnpm dev`. Use the URL `sst deploy` prints if it differs.
+   5. **In Chrome or Firefox at http://localhost:3333, check that:**
+      - signing in shows your avatar
+      - Sign out ends both sessions and returns to localhost
+      - cancelling at Google shows "Sign-in was cancelled."
+      - Sign in and Sign out are disabled from Start until Reset
+2. **Deploy the frontend to `dev`** (see below) and check the same things there.
+3. **Slice 3, recording a Tournament** (Decisions 23–30 and 34). It's designed; split it into one PR per task before starting. Two loose ends belong there:
    - Decision 35's register QR code returning to `/me`.
    - The backend only lets a Participant record.
-3. **Then deploy to `prod` and run backend task 14.3** through the real UI.
-4. **Slice 4 (profile and avatar) and the admin UI** still need designing.
+4. **Then deploy to `prod` and run backend task 14.3** through the real UI.
+5. **Slice 4 (profile and avatar) and the admin UI** still need designing.
 
 ### Deploying the frontend by hand
 
@@ -163,7 +170,11 @@ The `dev` stage is https://d3qe36cyda6430.cloudfront.net, and `prod` is https://
 3. Run `aws s3 sync dist/ s3://<frontendBucket>/ --delete`. That replaces the placeholder `index.html`.
 4. Run `aws cloudfront create-invalidation --distribution-id <distributionId> --paths "/*"`.
 
-Credentials for AWS account `512808912517` are needed in the environment. Not done yet: on the session 5 machine, the AWS CLI wasn't installed and the credentials it had were rejected (`IncompleteSignature`).
+Credentials for AWS account `512808912517` are needed in the environment, exported before the editor or Claude Code starts. On the session 5 machine:
+- The AWS CLI wasn't installed, and Python had no `pip` or `venv` to install it with. Install AWS CLI v2 on the next machine.
+- The first credentials were rejected with `IncompleteSignature`. New ones were added on 2026-11-25 but not yet tried.
+
+Nothing has been uploaded to any stage yet.
 
 ### Setting up a new machine
 

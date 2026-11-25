@@ -603,7 +603,16 @@ button:hover {
     box-shadow: 3px 7px 11px 1px black;
     font-size: 1.2rem;
 
-    fieldset {
+    .record-tournament-fields {
+        display: grid;
+        gap: 1rem;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: none;
+    }
+
+    .member-choices {
         display: grid;
         gap: 0.5rem;
         border: 1px solid rgba(255, 255, 255, 0.3);
@@ -615,7 +624,7 @@ button:hover {
         gap: 0.25rem;
     }
 
-    fieldset label {
+    .member-choices label {
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -634,6 +643,19 @@ button:hover {
     button {
         justify-self: start;
         padding-inline: 2rem;
+    }
+
+    .photo-retry {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+
+        p {
+            flex-basis: 100%;
+            margin: 0;
+            color: #ff8a80;
+        }
     }
 }
 

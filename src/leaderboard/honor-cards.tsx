@@ -1,5 +1,5 @@
 import type { LeaderboardEntry } from '@pstephenwille/poker-timer-contracts';
-import { Link } from 'react-router';
+import { TimerExitLink } from '../components/timer-exit-link';
 import { formatWinCount, formatWinDate } from './format';
 import { handName } from './hand-names';
 import { MemberAvatar } from './member-avatar';
@@ -28,7 +28,7 @@ export function ReigningChampionCard({ reigningChampion }: { reigningChampion: L
   return (
     <section className="honor-card reigning-champion" aria-label="Reigning Champion">
       <h3>Reigning Champion</h3>
-      <Link to="/leaderboard" className="honor-card-link">
+      <TimerExitLink to="/leaderboard" className="honor-card-link">
         {reigningChampion ? (
           <>
             <MemberAvatar displayName={reigningChampion.displayName} avatarUrl={reigningChampion.avatarUrl} />
@@ -38,7 +38,7 @@ export function ReigningChampionCard({ reigningChampion }: { reigningChampion: L
         ) : (
           <p>{NO_WINNER_YET}</p>
         )}
-      </Link>
+      </TimerExitLink>
     </section>
   );
 }

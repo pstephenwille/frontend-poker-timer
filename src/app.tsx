@@ -1,7 +1,6 @@
 import { Header } from './components/header';
-import { MainDisplay } from './components/main-display';
+import { TimerScreen } from './components/timer-screen';
 import './App.css'
-import { BlindsSchedule } from './components/blinds-schedule';
 import { useGameEngine } from './game-engine';
 import { useEffect, useEffectEvent } from 'react';
 import { Route, Routes } from 'react-router';
@@ -59,7 +58,7 @@ export function App() {
     <div className="app">
       <Header />
       <Routes>
-        <Route path="/" element={<><MainDisplay /><BlindsSchedule /></>} />
+        <Route path="/" element={<TimerScreen />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
       </Routes>
     </div>

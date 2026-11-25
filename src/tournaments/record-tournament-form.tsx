@@ -1,4 +1,4 @@
-import { HAND_CATEGORIES, HandCategory, type MemberSummary } from '@pstephenwille/poker-timer-contracts';
+import { HAND_CATEGORIES, HandCategory, MAX_NOTE_LENGTH, type MemberSummary } from '@pstephenwille/poker-timer-contracts';
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { LEADERBOARD_PATH } from '../app-paths';
@@ -12,14 +12,17 @@ const MEMBERS_FAILED_MESSAGE = "The Members couldn't be loaded. Reload the page 
 const SAVE_FAILED_MESSAGE = "The Tournament couldn't be recorded. Try again.";
 const HANDS_STRONGEST_FIRST = [...HAND_CATEGORIES].reverse();
 
-function ParticipantChoices({ members, checkedIds, onToggle }: {
+const withoutId = (ids: string[], idToRemove: string) => ids.filter((id) => id !== idToRemove);
+
+function MemberChoices({ legend, members, checkedIds, onToggle }: {
+  legend: string;
   members: MemberSummary[];
   checkedIds: string[];
   onToggle: (memberId: string) => void;
 }) {
   return (
     <fieldset>
-      <legend>Participants</legend>
+      <legend>{legend}</legend>
       {members.map((member) => (
         <label key={member.id}>
           <input type="checkbox" checked={checkedIds.includes(member.id)} onChange={() => onToggle(member.id)} />
@@ -57,12 +60,15 @@ function RecordTournamentFields({ members }: { members: MemberSummary[] }) {
     winningHand: '',
     pot: '',
     playedOn: initialPlayedOn(searchParams.get('playedOn')),
+    finalHandOpponentIds: [],
+    note: '',
   }));
   const [problems, setProblems] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
   const updateDraft = (changes: Partial<TournamentDraft>) => setDraft((current) => ({ ...current, ...changes }));
   const checkedParticipants = members.filter((member) => draft.participantIds.includes(member.id));
+  const opponentCandidates = checkedParticipants.filter((member) => member.id !== draft.winnerId);
 
   const toggleParticipant = (memberId: string) => setDraft((current) => {
     const isUnchecking = current.participantIds.includes(memberId);
@@ -70,9 +76,25 @@ function RecordTournamentFields({ members }: { members: MemberSummary[] }) {
 
     return {
       ...current,
-      participantIds: current.participantIds.filter((id) => id !== memberId),
+      participantIds: withoutId(current.participantIds, memberId),
       winnerId: current.winnerId === memberId ? '' : current.winnerId,
+      finalHandOpponentIds: withoutId(current.finalHandOpponentIds, memberId),
     };
+  });
+
+  const chooseWinner = (winnerId: string) => setDraft((current) => ({
+    ...current,
+    winnerId,
+    finalHandOpponentIds: withoutId(current.finalHandOpponentIds, winnerId),
+  }));
+
+  const toggleOpponent = (memberId: string) => setDraft((current) => {
+    const isUnchecking = current.finalHandOpponentIds.includes(memberId);
+    const finalHandOpponentIds = isUnchecking
+      ? withoutId(current.finalHandOpponentIds, memberId)
+      : [...current.finalHandOpponentIds, memberId];
+
+    return { ...current, finalHandOpponentIds };
   });
 
   const save = async (event: FormEvent) => {
@@ -93,10 +115,15 @@ function RecordTournamentFields({ members }: { members: MemberSummary[] }) {
 
   return (
     <form aria-label="Record a Tournament" className="record-tournament-form" noValidate onSubmit={save}>
-      <ParticipantChoices members={members} checkedIds={draft.participantIds} onToggle={toggleParticipant} />
+      <MemberChoices
+        legend="Participants"
+        members={members}
+        checkedIds={draft.participantIds}
+        onToggle={toggleParticipant}
+      />
       <label>
         Winner
-        <select value={draft.winnerId} onChange={(event) => updateDraft({ winnerId: event.target.value })}>
+        <select value={draft.winnerId} onChange={(event) => chooseWinner(event.target.value)}>
           <option value="">Choose the Winner</option>
           {checkedParticipants.map((member) => <option key={member.id} value={member.id}>{member.displayName}</option>)}
         </select>
@@ -128,6 +155,20 @@ function RecordTournamentFields({ members }: { members: MemberSummary[] }) {
           type="datetime-local"
           value={toLocalDateTimeInput(draft.playedOn)}
           onChange={(event) => updateDraft({ playedOn: fromLocalDateTimeInput(event.target.value) })}
+        />
+      </label>
+      <MemberChoices
+        legend="Final Hand Opponents (optional)"
+        members={opponentCandidates}
+        checkedIds={draft.finalHandOpponentIds}
+        onToggle={toggleOpponent}
+      />
+      <label>
+        Note (optional)
+        <textarea
+          maxLength={MAX_NOTE_LENGTH}
+          value={draft.note}
+          onChange={(event) => updateDraft({ note: event.target.value })}
         />
       </label>
       <Problems messages={problems} />

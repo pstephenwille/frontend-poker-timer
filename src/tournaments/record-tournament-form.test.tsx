@@ -1,3 +1,4 @@
+import { MAX_NOTE_LENGTH } from '@pstephenwille/poker-timer-contracts';
 import { me as ann, members } from '@pstephenwille/poker-timer-contracts/fixtures';
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -20,7 +21,14 @@ const ONE_DAY_MILLIS = 24 * 60 * 60 * 1000;
 const ONE_MINUTE_MILLIS = 60 * 1000;
 const RECORD_URL = `/tournaments/new?playedOn=${PLAYED_ON}`;
 
-const participant = (name: string) => screen.findByRole('checkbox', { name });
+const cal = { ...inactiveCal, active: true };
+
+const participant = async (name: string) =>
+  within(await screen.findByRole('group', { name: 'Participants' })).getByRole('checkbox', { name });
+const opponentsGroup = () => screen.getByRole('group', { name: 'Final Hand Opponents (optional)' });
+const opponent = (name: string) => within(opponentsGroup()).getByRole('checkbox', { name });
+const opponentNames = () => within(opponentsGroup()).queryAllByRole('checkbox').map((box) => box.closest('label')?.textContent);
+const noteField = () => screen.getByRole('textbox', { name: 'Note (optional)' });
 const winnerChoice = () => screen.getByRole('combobox', { name: 'Winner' });
 const winningHandChoice = () => screen.getByRole('combobox', { name: 'Winning Hand' });
 const potField = () => screen.getByRole('spinbutton', { name: 'Pot ($)' });
@@ -165,6 +173,61 @@ describe('Played on', () => {
   });
 });
 
+describe('the Final Hand Opponents', () => {
+  beforeEach(() => {
+    serveMembers([annMember, bob, cal]);
+  });
+
+  async function checkEveryParticipantWithWinner(user: UserEvent, winnerName: string) {
+    await user.click(await participant(annMember.displayName));
+    await user.click(await participant(bob.displayName));
+    await user.click(await participant(cal.displayName));
+    await user.selectOptions(winnerChoice(), winnerName);
+  }
+
+  test('are chosen from the checked Participants other than the Winner', async () => {
+    const user = openRecordForm();
+
+    await checkEveryParticipantWithWinner(user, bob.displayName);
+
+    expect(opponentNames()).toEqual([annMember.displayName, cal.displayName]);
+  });
+
+  test('lose a Member who becomes the Winner', async () => {
+    const user = openRecordForm();
+    await checkEveryParticipantWithWinner(user, bob.displayName);
+    await user.click(opponent(cal.displayName));
+
+    await user.selectOptions(winnerChoice(), cal.displayName);
+    await user.selectOptions(winnerChoice(), bob.displayName);
+
+    expect(opponent(cal.displayName)).not.toBeChecked();
+  });
+
+  test('lose a Participant who is unchecked', async () => {
+    const user = openRecordForm();
+    await checkEveryParticipantWithWinner(user, bob.displayName);
+    await user.click(opponent(cal.displayName));
+
+    await user.click(await participant(cal.displayName));
+    await user.click(await participant(cal.displayName));
+
+    expect(opponent(cal.displayName)).not.toBeChecked();
+  });
+});
+
+describe('the Note', () => {
+  test(`stops at ${MAX_NOTE_LENGTH} characters`, async () => {
+    const user = openRecordForm();
+    await participant(bob.displayName);
+
+    await user.click(noteField());
+    await user.paste('x'.repeat(MAX_NOTE_LENGTH + 1));
+
+    expect(noteField()).toHaveValue('x'.repeat(MAX_NOTE_LENGTH));
+  });
+});
+
 describe('saving', () => {
   test('needs at least two Participants and a Winner', async () => {
     const user = openRecordForm();
@@ -196,6 +259,23 @@ describe('saving', () => {
       winnerId: bob.id,
       winningHand: 'full_house',
       pot: 120,
+    });
+  });
+
+  test('sends the Final Hand Opponents and the Note as entered', async () => {
+    acceptTournaments();
+    serveLeaderboard([]);
+    const user = openRecordForm();
+    await fillInEveryRequiredField(user);
+    await user.click(opponent(annMember.displayName));
+    await user.type(noteField(), 'Rivered the boat.');
+
+    await save(user);
+
+    await screen.findByRole('table', { name: 'Leaderboard' });
+    expect(JSON.parse(String(tournamentsPosted()[0]?.body))).toMatchObject({
+      finalHandOpponentIds: [annMember.id],
+      note: 'Rivered the boat.',
     });
   });
 

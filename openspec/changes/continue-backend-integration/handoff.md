@@ -1,17 +1,17 @@
 # Handoff: continue-backend-integration
 
-Status as of 2026-11-25, after session 8, for picking up on another machine or in a new session. `tasks.md` is the source of truth for what's left. This file records where things are deployed, what's done, and how the work is run. The design, as numbered Decisions, is in `docs/handoff-backend-integration.md`. Check PR and deploy state on GitHub rather than trusting this file.
+Status as of 2026-11-25, after session 9, for picking up on another machine or in a new session. `tasks.md` is the source of truth for what's left. This file records where things are deployed, what's done, and how the work is run. The design, as numbered Decisions, is in `docs/handoff-backend-integration.md`. Check PR and deploy state on GitHub rather than trusting this file.
 
 ## Where it stands
 
 - **Slices 1–3 are built, merged and checked on `dev`:** the read-only Leaderboard, sign-in and sign-out, and recording a Tournament.
-- **The frontend is on `dev`** from `master` at `7b6882f`, and **on `prod`** from `master` at `cc64bef` (task 1.1). The app code is the same in both; only docs changed between them.
-- **The backend** is at `6ccec59` on `dev` and `prod`, with contracts `1.0.0`, and lets any Member record (Decision 36). Its change `add-mvp-backend` has two open tasks: 14.1 (custom domain) and 14.3 (the `prod` check through this UI).
+- **The frontend is on `dev`** from `master` at `d957c17`, which records a Tournament with only its Winner (`require-only-winner`), and **on `prod`** from `master` at `cc64bef` (task 1.1), which still needs two Participants.
+- **The backend** is at `1c3dde9` on `dev`, with contracts `1.1.0`, which lets the Winner be the only Participant (Decision 46). `prod` is still at `6ccec59` with contracts `1.0.0`: that Deliver run's `prod` job is waiting for approval. Approve it before deploying the frontend to `prod`, or the backend will refuse Winner-only Tournaments. Its change `add-mvp-backend` has two open tasks: 14.1 (custom domain) and 14.3 (the `prod` check through this UI).
 - **Slice 4 is designed** (Decisions 42–45, the `member-profile` spec) and split into tasks 2.2–2.8. One needs a backend change: `avatarStatus` on `Me`, as contracts 1.2.0 (task 2.5).
 - **Next:** task 2.2, Me in the account menu, not yet started: no branch is pushed. The menu is `src/members/account-menu.tsx`, its tests are in `src/members/sign-out.test.tsx` and `account.test.tsx`, and the requirements are in `specs/account-menu/spec.md`. Build it test-first.
-- **On hold:** task 1.2 (backend task 14.3), until a second Google account is available or `require-only-winner` lands. `prod` has one Member and no Tournaments.
+- **On hold:** task 1.2 (backend task 14.3), until a second Google account is available or `require-only-winner` reaches `prod`. `prod` has one Member and no Tournaments.
 - **To settle in task 2.3:** replacing the placeholder `/me` drops its "You're registered, <display name>. The host can now check you on the Record form." line (Decision 41). Ask whether to keep it for players arriving from the register QR code.
-- **Also open:** `openspec/changes/require-only-winner`, proposed but not yet designed.
+- **Also open:** `openspec/changes/require-only-winner`, at 4/5 tasks. It is built and checked on `dev`; task 4.1's `prod` deploy was skipped for now.
 
 ## Setting up a new machine
 
@@ -91,6 +91,11 @@ Against an ordinary stage, sign-in can't complete from localhost: Google returns
   - The six timer buttons wrap sensibly on a narrow screen.
 - **Task 1.1, the frontend on `prod`,** on 2026-11-25 from `cc64bef`, bundle `assets/index-Di2953uR.js`. The bucket held only the placeholder `index.html` beforehand. `/`, `/leaderboard`, `/tournaments/new` and `/me` serve the new bundle, and `/api/leaderboard` answers 200. Docs: PR #32.
 - **Task 2.1, slice 4 designed:** Decisions 42–45, the `member-profile` spec, and tasks 2.3–2.8. PR #33.
+- **`require-only-winner`, tasks 1.1–3.2** (Decisions 46–49):
+  - Design: PR #35. Contracts `1.1.0` for this change and `1.2.0` for `avatarStatus`: PR #36.
+  - Backend PR #24: `MIN_PARTICIPANTS` from 2 to 1, contracts `1.1.0` published. Merged as `1c3dde9` and deployed to `dev`; `prod` awaits approval.
+  - Frontend PR #37: the Record form and the Leaderboard's Played note.
+- **`require-only-winner` checked on `dev`** on 2026-11-25, from `d957c17` (bundle `assets/index-aKTUIsW8.js`) against backend `1c3dde9`. The bucket held only the previous build beforehand. A Tournament with only its Winner saves, and the Leaderboard and both honor cards show it. The `prod` deploys were skipped for now.
 
 ## Choices made while building slice 3, for review (task 4.2)
 
@@ -108,3 +113,4 @@ Against an ordinary stage, sign-in can't complete from localhost: Google returns
 - **Session 6 (2026-11-25):** checked slice 2 on a personal stage and on `dev`, first deployed to `dev`, split slice 3 into seven PRs, built PR 1, and settled Decisions 36–39.
 - **Session 7 (2026-11-25):** set up a second machine, built slice 3 PRs 2–7, settled Decisions 40 and 41, deployed slice 3 to `dev` and checked it, made the backend change for Decision 36, and moved the remaining work into OpenSpec: this change and `require-only-winner`.
 - **Session 8 (2026-11-25):** deployed the frontend to `prod` (task 1.1), put task 1.2 on hold, and designed slice 4 (Decisions 42–45, task 2.1). Stopped before starting task 2.2.
+- **Session 9 (2026-11-25):** designed `require-only-winner` (Decisions 46–49), released contracts `1.1.0` for it and moved `avatarStatus` to `1.2.0`, built it, and deployed and checked it on `dev`. Skipped the `prod` deploys.

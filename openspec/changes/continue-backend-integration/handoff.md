@@ -1,13 +1,13 @@
 # Handoff: continue-backend-integration
 
-Status as of 2026-11-25, after session 7, for picking up on another machine or in a new session. `tasks.md` is the source of truth for what's left. This file records where things are deployed, what's done, and how the work is run. The design, as numbered Decisions, is in `docs/handoff-backend-integration.md`. Check PR and deploy state on GitHub rather than trusting this file.
+Status as of 2026-11-25, after session 8, for picking up on another machine or in a new session. `tasks.md` is the source of truth for what's left. This file records where things are deployed, what's done, and how the work is run. The design, as numbered Decisions, is in `docs/handoff-backend-integration.md`. Check PR and deploy state on GitHub rather than trusting this file.
 
 ## Where it stands
 
 - **Slices 1–3 are built, merged and checked on `dev`:** the read-only Leaderboard, sign-in and sign-out, and recording a Tournament.
-- **The frontend is on `dev`** from `master` at `7b6882f`. Nothing has been uploaded to `prod`, which still serves SST's placeholder page.
+- **The frontend is on `dev`** from `master` at `7b6882f`, and **on `prod`** from `master` at `cc64bef` (task 1.1). The app code is the same in both; only docs changed between them.
 - **The backend** is at `6ccec59` on `dev` and `prod`, with contracts `1.0.0`, and lets any Member record (Decision 36). Its change `add-mvp-backend` has two open tasks: 14.1 (custom domain) and 14.3 (the `prod` check through this UI).
-- **Next:** task 1.1, deploying the frontend to `prod`, then 1.2, backend task 14.3.
+- **Next:** task 1.2, backend task 14.3, checking `prod` through this UI.
 - **Also open:** `openspec/changes/require-only-winner`, proposed but not yet designed.
 
 ## Setting up a new machine
@@ -27,7 +27,7 @@ Status as of 2026-11-25, after session 7, for picking up on another machine or i
 | Stage | URL | Frontend bucket | Distribution |
 | --- | --- | --- | --- |
 | `dev` | https://d3qe36cyda6430.cloudfront.net | `poker-timer-dev-frontendbucket-htazhobe` | `E1J1N6X6GCOF47` |
-| `prod` | https://d228ov3aayfbkh.cloudfront.net | find by name (task 1.1) | find by domain (task 1.1) |
+| `prod` | https://d228ov3aayfbkh.cloudfront.net | `poker-timer-prod-frontendbucket-dtssrvvo` | `E278RNH4ORXCJQ` |
 | `stephen` (personal) | https://dtp80nyn4zjug.cloudfront.net | `poker-timer-stephen-frontendbucket-ubscxsen` | `E1D10KR82CPHON` |
 
 Each stage serves the frontend and `/api/*` from the same address. The media bucket's CORS allows only the stage's own origin, so photo uploads can't be checked from `pnpm dev`.
@@ -86,6 +86,7 @@ Against an ordinary stage, sign-in can't complete from localhost: Google returns
   - The photo appears, including one taken on an iPhone.
   - Scanning the QR code registers and lands on `/me`, and the new Member appears when the timer's window is focused again.
   - The six timer buttons wrap sensibly on a narrow screen.
+- **Task 1.1, the frontend on `prod`,** on 2026-11-25 from `cc64bef`, bundle `assets/index-Di2953uR.js`. The bucket held only the placeholder `index.html` beforehand. `/`, `/leaderboard`, `/tournaments/new` and `/me` serve the new bundle, and `/api/leaderboard` answers 200.
 
 ## Choices made while building slice 3, for review (task 4.2)
 
@@ -102,3 +103,4 @@ Against an ordinary stage, sign-in can't complete from localhost: Google returns
 - **Session 5 (2026-11-24):** opened slice 4 but skipped its first question, then built Decision 21 through slice 2.
 - **Session 6 (2026-11-25):** checked slice 2 on a personal stage and on `dev`, first deployed to `dev`, split slice 3 into seven PRs, built PR 1, and settled Decisions 36–39.
 - **Session 7 (2026-11-25):** set up a second machine, built slice 3 PRs 2–7, settled Decisions 40 and 41, deployed slice 3 to `dev` and checked it, made the backend change for Decision 36, and moved the remaining work into OpenSpec: this change and `require-only-winner`.
+- **Session 8 (2026-11-25):** deployed the frontend to `prod` (task 1.1).

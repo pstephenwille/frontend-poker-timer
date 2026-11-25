@@ -12,6 +12,7 @@ import {
   serveMembers,
   signIn,
 } from '../testing/fake-backend';
+import { leaderboardEntry } from '../testing/leaderboard-entries';
 import { renderApp } from '../testing/render-app';
 
 const [annMember, bob, inactiveCal] = members;
@@ -292,5 +293,52 @@ describe('saving', () => {
     expect(await participant(bob.displayName)).toBeChecked();
     expect(winnerChoice()).toHaveDisplayValue(bob.displayName);
     expect(potField()).toHaveValue(120);
+  });
+});
+
+describe('after a save', () => {
+  const leaderboardWithBobJustWon = [
+    leaderboardEntry(bob.displayName, { userId: bob.id, rank: 1, wins: 1, lastWonAt: PLAYED_ON }),
+    leaderboardEntry(annMember.displayName, { userId: annMember.id, rank: 2 }),
+  ];
+  const leaderboardRow = (name: string) => screen.getByRole('row', { name: new RegExp(name) });
+
+  async function recordBobsWin() {
+    acceptTournaments();
+    serveLeaderboard(leaderboardWithBobJustWon);
+    const user = openRecordForm();
+    await fillInEveryRequiredField(user);
+    await save(user);
+    await screen.findByRole('table', { name: 'Leaderboard' });
+
+    return user;
+  }
+
+  test("the Leaderboard highlights the new Winner's row", async () => {
+    await recordBobsWin();
+
+    expect(leaderboardRow(bob.displayName)).toHaveAttribute('aria-current', 'true');
+    expect(leaderboardRow(annMember.displayName)).not.toHaveAttribute('aria-current');
+  });
+
+  test('the highlight is gone when the Leaderboard is opened again', async () => {
+    const user = await recordBobsWin();
+
+    await user.click(screen.getByRole('link', { name: 'Timer' }));
+    await user.click(screen.getByRole('link', { name: 'Leaderboard' }));
+
+    await screen.findByRole('table', { name: 'Leaderboard' });
+    expect(leaderboardRow(bob.displayName)).not.toHaveAttribute('aria-current');
+  });
+
+  test('going back to the timer shows the new Tournament on both honor cards', async () => {
+    const user = await recordBobsWin();
+
+    await user.click(screen.getByRole('link', { name: 'Timer' }));
+
+    const lastWinner = await screen.findByRole('region', { name: 'Last Winner' });
+    expect(within(lastWinner).getByText(bob.displayName)).toBeInTheDocument();
+    const champion = screen.getByRole('region', { name: 'Reigning Champion' });
+    expect(within(champion).getByText(bob.displayName)).toBeInTheDocument();
   });
 });

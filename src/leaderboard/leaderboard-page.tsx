@@ -1,14 +1,16 @@
 import type { LeaderboardEntry } from '@pstephenwille/poker-timer-contracts';
+import { useLocation } from 'react-router';
 import { formatDollars, formatOptional, formatWinRate } from './format';
 import { handName } from './hand-names';
 import { MemberAvatar } from './member-avatar';
+import { newWinnerIdFrom } from './new-winner-highlight';
 import { useLeaderboard } from './use-leaderboard';
 
-function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
+function LeaderboardRow({ entry, isNewWinner }: { entry: LeaderboardEntry; isNewWinner: boolean }) {
   const latestHand = entry.latestWinningHand && handName(entry.latestWinningHand);
 
   return (
-    <tr>
+    <tr aria-current={isNewWinner || undefined}>
       <td>{entry.rank}</td>
       <td className="leaderboard-member">
         <MemberAvatar displayName={entry.displayName} avatarUrl={entry.avatarUrl} />
@@ -25,6 +27,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
 
 export function LeaderboardPage() {
   const state = useLeaderboard();
+  const newWinnerId = newWinnerIdFrom(useLocation().state);
 
   if (state.status === 'loading') return <p className="leaderboard-status">Loading the Leaderboard…</p>;
   if (state.status === 'failed') return <p className="leaderboard-status">The Leaderboard couldn't be loaded.</p>;
@@ -44,7 +47,9 @@ export function LeaderboardPage() {
         </tr>
       </thead>
       <tbody>
-        {state.leaderboard.map((entry) => <LeaderboardRow key={entry.userId} entry={entry} />)}
+        {state.leaderboard.map((entry) => (
+          <LeaderboardRow key={entry.userId} entry={entry} isNewWinner={entry.userId === newWinnerId} />
+        ))}
       </tbody>
     </table>
   );

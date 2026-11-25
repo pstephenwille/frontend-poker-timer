@@ -1,6 +1,6 @@
 # Handoff: building the frontend on the backend
 
-Status as of 2026-11-24, after the fourth grilling session. This was a design (grilling) session, now complete, run with the `grill-with-docs` skill. No code has changed yet. Decisions made so far are recorded here. Terms that are settled are in `GLOSSARY.md`.
+Status as of 2026-11-24, after session 5. Slices 1 and 2 are built and merged, but not yet deployed or tried against the real backend; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
 
 To reopen the design, run `/mattpocock-skills:grill-with-docs` and point it at this file. Ask questions **one at a time**, each with a recommended answer, and record each answer here and in `GLOSSARY.md` as soon as it is given. The backend repo (`../backend-poker-timer`) is read only for facts; this repo is where the design lives.
 
@@ -10,7 +10,7 @@ Build the UI for the backend in `../backend-poker-timer`. It provides Google sig
 
 ## Backend facts that shape the UI
 
-- The leaderboard (`GET /api/leaderboard`) is public, needs no sign-in, and is recomputed on each read. Each entry has: rank, display name, avatar URL, wins, tournaments played, win rate, total winnings and latest winning hand. Ties share a rank, and everyone with 0 wins shares the last rank (to change: Decisions 17 and 18).
+- The leaderboard (`GET /api/leaderboard`) is public, needs no sign-in, and is recomputed on each read. Each entry has: rank, display name, avatar URL, wins, tournaments played, win rate, total winnings, latest winning hand and `lastWonAt`. Since contracts 1.0.0, every member with a win has their own rank, full ties go to the most recent winner, and only members with 0 wins share the last rank (Decisions 17 and 18).
 - Tournament routes appear to need a session (`requireSession` in `packages/api/src/app.ts`). Tournament photos are private, served through signed URLs that expire within an hour.
 - Keeping the timer in sync with the backend is out of scope for the backend's MVP. A tournament is recorded after it ends, so the leaderboard doesn't change during a game.
 - Guests (players without accounts) can't be recorded, and the Winner must be a member.
@@ -119,4 +119,65 @@ These are UI states, not domain terms, so they stay out of `GLOSSARY.md`.
 
 Session 4 (2026-11-24) designed slices 2 and 3, sign-in and recording a Tournament (Decisions 23–35). Slice 4, profile and avatar (including the `/me` page's contents), and the admin UI remain undesigned. Next step is implementation, starting with step 1 of Decision 21.
 
-Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds) was skipped, so slice 4 is still undesigned. Step 1 of Decision 21 is implemented on branch `refactor/round-to-level`. Step 2 is implemented, not yet committed, on the backend branch `contracts-v1-domain-language`, as contracts `1.0.0` (openspec tasks 16.1–16.3, ADR `docs/adr/0001-rename-opponent-column-in-one-migration.md`). Its integration tests still need a machine with Docker. Merging it to `master` publishes the contracts and deploys the migration. After that comes step 3, starting with slice 1 (the read-only Leaderboard).
+Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds) was skipped, so slice 4 is still undesigned. It then implemented Decision 21 through slice 2.
+
+### Done
+
+- **Step 1 (frontend refactor):** Round → Level, `setStartingBlind`, the Color-up Break after the 15 blind, and "Take Break" disabled until Start. Merged as PR #5.
+- **Step 2 (backend contracts 1.0.0):**
+  - `finalHandOpponentIds`, `lastWonAt`, the most-recent-win tiebreak and distinct ranks.
+  - The column rename, with ADR `docs/adr/0001-rename-opponent-column-in-one-migration.md` in the backend.
+  - Openspec tasks 16.1–16.3.
+  - Merged as backend PR #21. It's published to GitHub Packages and deployed to `dev`. `prod`'s deploy waits for approval under **Actions → Deliver**.
+- **Slice 1 (read-only Leaderboard):** PRs #6–#11.
+  - Vitest and the contracts package.
+  - `pickHonors`.
+  - The `/leaderboard` page.
+  - The Last Winner and Reigning Champion cards.
+  - Navigation that holds the table during play (Decision 31).
+  - Styles, with the Leaderboard dropping columns below 600px.
+- **Slice 2 (sign-in and sign-out):** PRs #13–#15, after the Decision 33 amendment in PR #12.
+  - The header shows the signed-in Member, or Sign in with `returnTo`.
+  - Full sign-out through Cognito.
+  - Both are disabled from Start until Reset.
+  - The sign-in error banner (Decision 35).
+
+### Next
+
+1. **Deploy the frontend to `dev` and try slice 2 for real.** Sign-in can't complete from `pnpm dev`: Google returns to the stage's own address, and the backend refuses a `POST` whose `Origin` is localhost. On `dev`, check that:
+   - signing in shows your avatar
+   - Sign out ends both sessions
+   - cancelling at Google shows "Sign-in was cancelled."
+2. **Slice 3, recording a Tournament** (Decisions 23–30 and 34). It's designed; split it into one PR per task before starting. Two loose ends belong there:
+   - Decision 35's register QR code returning to `/me`.
+   - The backend only lets a Participant record.
+3. **Then deploy to `prod` and run backend task 14.3** through the real UI.
+4. **Slice 4 (profile and avatar) and the admin UI** still need designing.
+
+### Deploying the frontend by hand
+
+The `dev` stage is https://d3qe36cyda6430.cloudfront.net, and `prod` is https://d228ov3aayfbkh.cloudfront.net. The backend's `README.md` gives the steps.
+
+1. Find the stage's `frontendBucket` and `distributionId`. `sst deploy` prints them, or find them with `aws cloudfront list-distributions`: match the stage's domain and read its S3 origin.
+2. Run `pnpm build`.
+3. Run `aws s3 sync dist/ s3://<frontendBucket>/ --delete`. That replaces the placeholder `index.html`.
+4. Run `aws cloudfront create-invalidation --distribution-id <distributionId> --paths "/*"`.
+
+Credentials for AWS account `512808912517` are needed in the environment. Not done yet: on the session 5 machine, the AWS CLI wasn't installed and the credentials it had were rejected (`IncompleteSignature`).
+
+### Setting up a new machine
+
+- **Node 24 and pnpm.** Run `pnpm install`, then `pnpm test`, `pnpm lint` and `pnpm build`.
+- **Installing the contracts from GitHub Packages needs a token,** even though the package is public:
+  - Create a classic personal access token with only `read:packages`, and export it as `GITHUB_TOKEN` before starting the editor or Claude Code.
+  - Add `//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}` to `~/.npmrc`. pnpm ignores tokens from environment variables in a project `.npmrc`, which names only the registry.
+- **`pnpm dev`** serves on port 3333 and proxies `/api` to `dev`, or to `API_ORIGIN` when it's set.
+- **The `gh` CLI wasn't installed** in session 5, so PRs were opened by hand from the pushed branches.
+
+### How the work is run
+
+- **One branch and PR per task.** Each starts from `master` once the previous PR is merged.
+- **One step at a time.** Stop after each step for review.
+- **Diffable edits.** Make file changes with diffable edits, not shell rewrites.
+- **Test-first,** with tests at agreed seams. So far that's the whole app rendered with `fetch` answered by `src/testing/fake-backend.ts`, plus pure functions like `pickHonors`.
+- **US spelling** (honors, color).

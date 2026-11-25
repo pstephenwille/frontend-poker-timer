@@ -154,7 +154,11 @@ Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds)
       - Passed: Sign out ends both sessions and returns to localhost; the next Sign in goes to Google.
       - Passed: Sign out is disabled while a game runs and is enabled again after Reset.
       - Skipped: cancelling at Google shows "Sign-in was cancelled." Google shows Cancel only on its consent screen, which it skips once consent is given; use a private window or remove the app at https://myaccount.google.com/connections to see it.
-2. **Deploy the frontend to `dev`** (see below) and check the same things there, including the skipped cancel check.
+2. **Deploy the frontend to `dev`** (see below) and check the same things there. Done on 2026-11-25 at https://d3qe36cyda6430.cloudfront.net:
+   - Passed: signing in shows your avatar.
+   - Passed: Sign out ends both sessions and returns to `dev`; the next Sign in goes to Google.
+   - Passed: Sign out is disabled while a game runs and is enabled again after Reset.
+   - Skipped again: cancelling at Google. It's still unchecked anywhere.
 3. **Slice 3, recording a Tournament** (Decisions 23–30 and 34). It's designed; split it into one PR per task before starting. Two loose ends belong there:
    - Decision 35's register QR code returning to `/me`.
    - The backend only lets a Participant record.

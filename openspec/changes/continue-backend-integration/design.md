@@ -12,9 +12,9 @@ Decisions 1–41 in `docs/handoff-backend-integration.md` settle slices 1–3, t
 
 ## Open questions for slice 4
 
-Settle these one at a time, each with a recommended answer, and record each as a numbered Decision (the next free number is 42). Session 5 opened slice 4 but skipped its first question, so none is settled.
+Settle these one at a time, each with a recommended answer, and record each as a numbered Decision (the next free number is 42). Session 5 opened slice 4 but skipped its first question. Session 8 settled the first.
 
-1. What does `/me` hold: display name, username, avatar, stats (`MemberProfile`), recent Tournaments?
+1. ~~What does `/me` hold?~~ Settled by Decision 42: avatar, display name, username and `MemberProfile` stats, without recent Tournaments.
 2. How is the avatar changed: a file input like the Tournament photo, with the same type and size checks?
 3. Can a Member set or change their username there, and what does the page say when it's taken?
 4. Can other Members' profiles be opened, for example from the Leaderboard?

@@ -616,9 +616,14 @@ button:hover {
         gap: 0.5rem;
     }
 
-    select, input:not([type="checkbox"]), button {
-        font-size: inherit;
+    select, input:not([type="checkbox"]), textarea, button {
+        font: inherit;
         padding: 0.4rem;
+    }
+
+    textarea {
+        min-height: 5rem;
+        resize: vertical;
     }
 
     button {

@@ -8,7 +8,14 @@ export interface TournamentDraft {
   pot: string;
   /** Epoch milliseconds, or NaN while the field is empty. */
   playedOn: number;
+  finalHandOpponentIds: string[];
+  note: string;
 }
+
+const optionalFields = ({ finalHandOpponentIds, note }: TournamentDraft) => ({
+  ...(finalHandOpponentIds.length > 0 && { finalHandOpponentIds }),
+  ...(note.trim() && { note }),
+});
 
 const WHOLE_DOLLARS = /^\d+$/;
 
@@ -41,5 +48,6 @@ export function toCreateTournament(draft: TournamentDraft): CreateTournament {
     winnerId: draft.winnerId,
     winningHand: draft.winningHand,
     pot: Number(draft.pot),
+    ...optionalFields(draft),
   };
 }

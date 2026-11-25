@@ -3,7 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { LEADERBOARD_PATH } from '../app-paths';
 import { handName } from '../leaderboard/hand-names';
-import { initialPlayedOn } from './played-on';
+import { fromLocalDateTimeInput, initialPlayedOn, toLocalDateTimeInput } from './played-on';
 import { draftProblems, toCreateTournament, type TournamentDraft } from './tournament-draft';
 import { recordTournament, TournamentRefusedError } from './tournaments-api';
 import { useActiveMembers } from './use-active-members';
@@ -126,8 +126,8 @@ function RecordTournamentFields({ members }: { members: MemberSummary[] }) {
         Played on
         <input
           type="datetime-local"
-          value={draft.playedOn}
-          onChange={(event) => updateDraft({ playedOn: event.target.value })}
+          value={toLocalDateTimeInput(draft.playedOn)}
+          onChange={(event) => updateDraft({ playedOn: fromLocalDateTimeInput(event.target.value) })}
         />
       </label>
       <Problems messages={problems} />

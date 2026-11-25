@@ -1,58 +1,44 @@
 import { MAX_NOTE_LENGTH } from '@pstephenwille/poker-timer-contracts';
 import { me as ann, members } from '@pstephenwille/poker-timer-contracts/fixtures';
 import { fireEvent, screen, within } from '@testing-library/react';
-import userEvent, { type UserEvent } from '@testing-library/user-event';
+import { type UserEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   acceptTournaments,
   failMembers,
   refuseTournaments,
-  requestsTo,
   serveLeaderboard,
   serveMembers,
   signIn,
 } from '../testing/fake-backend';
 import { leaderboardEntry } from '../testing/leaderboard-entries';
-import { renderApp } from '../testing/render-app';
+import {
+  annMember,
+  bob,
+  fillInEveryRequiredField,
+  inactiveCal,
+  openRecordForm,
+  participant,
+  PLAYED_ON,
+  potField,
+  save,
+  tournamentsPosted,
+  winnerChoice,
+} from '../testing/record-tournament-form';
 
-const [annMember, bob, inactiveCal] = members;
-const PLAYED_ON = Date.UTC(2026, 10, 24, 4, 30);
 const PLAYED_ON_WITH_SECONDS = Date.UTC(2026, 10, 24, 4, 30, 12, 345);
 const ONE_DAY_MILLIS = 24 * 60 * 60 * 1000;
 const ONE_MINUTE_MILLIS = 60 * 1000;
-const RECORD_URL = `/tournaments/new?playedOn=${PLAYED_ON}`;
 
 const cal = { ...inactiveCal, active: true };
 
-const participant = async (name: string) =>
-  within(await screen.findByRole('group', { name: 'Participants' })).getByRole('checkbox', { name });
 const opponentsGroup = () => screen.getByRole('group', { name: 'Final Hand Opponents (optional)' });
 const opponent = (name: string) => within(opponentsGroup()).getByRole('checkbox', { name });
 const opponentNames = () => within(opponentsGroup()).queryAllByRole('checkbox').map((box) => box.closest('label')?.textContent);
 const noteField = () => screen.getByRole('textbox', { name: 'Note (optional)' });
-const winnerChoice = () => screen.getByRole('combobox', { name: 'Winner' });
-const winningHandChoice = () => screen.getByRole('combobox', { name: 'Winning Hand' });
-const potField = () => screen.getByRole('spinbutton', { name: 'Pot ($)' });
 const playedOnField = () => screen.getByLabelText<HTMLInputElement>('Played on');
-const save = (user: UserEvent) => user.click(screen.getByRole('button', { name: 'Save' }));
 const optionNames = (select: HTMLElement) => within(select).getAllByRole('option').map((option) => option.textContent);
-const tournamentsPosted = () => requestsTo('/api/tournaments');
 const postedPlayedOn = () => JSON.parse(String(tournamentsPosted()[0]?.body)).playedOn;
-
-async function fillInEveryRequiredField(user: UserEvent) {
-  await user.click(await participant(annMember.displayName));
-  await user.click(await participant(bob.displayName));
-  await user.selectOptions(winnerChoice(), bob.displayName);
-  await user.selectOptions(winningHandChoice(), 'Full House');
-  await user.type(potField(), '120');
-}
-
-function openRecordForm(path = RECORD_URL) {
-  const user = userEvent.setup();
-  renderApp(path);
-
-  return user;
-}
 
 beforeEach(() => {
   signIn(ann);

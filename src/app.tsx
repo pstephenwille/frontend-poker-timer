@@ -3,8 +3,10 @@ import { TimerScreen } from './components/timer-screen';
 import './App.css'
 import { useGameEngine } from './game-engine';
 import { useEffect, useEffectEvent } from 'react';
-import { Route, Routes } from 'react-router';
+import { Route, Routes, useLocation } from 'react-router';
 import { LeaderboardPage } from './leaderboard/leaderboard-page';
+
+const TIMER_PATH = '/';
 
 const isTypingInFormField = (target: EventTarget | null) =>
   target instanceof HTMLInputElement
@@ -19,6 +21,7 @@ const stopFocusedButtonFromAlsoClickingOnKeyUp = (target: EventTarget | null) =>
 
 export function App() {
   const engine = useGameEngine();
+  const isTimerShown = useLocation().pathname === TIMER_PATH;
 
   const closeOpenOverlays = () => {
     if (engine.breakIsActive) {
@@ -43,6 +46,7 @@ export function App() {
   };
 
   const onKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    if (!isTimerShown) return;
     if (event.code === 'Escape') closeOpenOverlays();
     if (event.code === 'Space') toggleGameClockWithSpaceBar(event);
   });
@@ -56,9 +60,10 @@ export function App() {
 
   return (
     <div className="app">
-      <Header />
+      <Header isTimerShown={isTimerShown} />
+      <TimerScreen isShown={isTimerShown} />
       <Routes>
-        <Route path="/" element={<TimerScreen />} />
+        <Route path={TIMER_PATH} element={null} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
       </Routes>
     </div>

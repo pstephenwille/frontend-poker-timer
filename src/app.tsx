@@ -5,6 +5,7 @@ import { useGameEngine } from './game-engine';
 import { useEffect, useEffectEvent } from 'react';
 import { Route, Routes, useLocation } from 'react-router';
 import { LeaderboardPage } from './leaderboard/leaderboard-page';
+import { SigninErrorBanner } from './members/signin-error-banner';
 
 const TIMER_PATH = '/';
 
@@ -61,6 +62,7 @@ export function App() {
   return (
     <div className="app">
       <Header isTimerShown={isTimerShown} />
+      <SigninErrorBanner />
       <TimerScreen isShown={isTimerShown} />
       <Routes>
         <Route path={TIMER_PATH} element={null} />

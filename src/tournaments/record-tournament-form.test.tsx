@@ -1,5 +1,5 @@
 import { me as ann, members } from '@pstephenwille/poker-timer-contracts/fixtures';
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
@@ -15,6 +15,7 @@ import { renderApp } from '../testing/render-app';
 
 const [annMember, bob, inactiveCal] = members;
 const PLAYED_ON = Date.UTC(2026, 10, 24, 4, 30);
+const PLAYED_ON_WITH_SECONDS = Date.UTC(2026, 10, 24, 4, 30, 12, 345);
 const ONE_DAY_MILLIS = 24 * 60 * 60 * 1000;
 const ONE_MINUTE_MILLIS = 60 * 1000;
 const RECORD_URL = `/tournaments/new?playedOn=${PLAYED_ON}`;
@@ -27,6 +28,7 @@ const playedOnField = () => screen.getByLabelText<HTMLInputElement>('Played on')
 const save = (user: UserEvent) => user.click(screen.getByRole('button', { name: 'Save' }));
 const optionNames = (select: HTMLElement) => within(select).getAllByRole('option').map((option) => option.textContent);
 const tournamentsPosted = () => requestsTo('/api/tournaments');
+const postedPlayedOn = () => JSON.parse(String(tournamentsPosted()[0]?.body)).playedOn;
 
 async function fillInEveryRequiredField(user: UserEvent) {
   await user.click(await participant(annMember.displayName));
@@ -125,6 +127,31 @@ describe('Played on', () => {
     const shownMillis = new Date(playedOnField().value).getTime();
     expect(Date.now() - shownMillis).toBeLessThan(ONE_MINUTE_MILLIS);
     expect(Date.now() - shownMillis).toBeGreaterThanOrEqual(0);
+  });
+
+  test("left as it is, saves the URL's exact instant, seconds and all", async () => {
+    acceptTournaments();
+    serveLeaderboard([]);
+    const user = openRecordForm(`/tournaments/new?playedOn=${PLAYED_ON_WITH_SECONDS}`);
+    await fillInEveryRequiredField(user);
+
+    await save(user);
+
+    await screen.findByRole('table', { name: 'Leaderboard' });
+    expect(postedPlayedOn()).toBe(PLAYED_ON_WITH_SECONDS);
+  });
+
+  test('once edited, saves the instant typed, in local time', async () => {
+    acceptTournaments();
+    serveLeaderboard([]);
+    const user = openRecordForm(`/tournaments/new?playedOn=${PLAYED_ON_WITH_SECONDS}`);
+    await fillInEveryRequiredField(user);
+
+    fireEvent.change(playedOnField(), { target: { value: '2026-11-20T21:15' } });
+    await save(user);
+
+    await screen.findByRole('table', { name: 'Leaderboard' });
+    expect(postedPlayedOn()).toBe(new Date(2026, 10, 20, 21, 15).getTime());
   });
 
   test("can't be in the future", async () => {

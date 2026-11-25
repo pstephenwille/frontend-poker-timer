@@ -1,21 +1,20 @@
 import { MIN_PARTICIPANTS, type CreateTournament, type HandCategory } from '@pstephenwille/poker-timer-contracts';
-import { fromLocalDateTimeInput } from './played-on';
 
-/** The form's fields as typed, before they are known to make a valid Tournament. */
+/** The form's fields as entered, before they are known to make a valid Tournament. */
 export interface TournamentDraft {
   participantIds: string[];
   winnerId: string;
   winningHand: HandCategory | '';
   pot: string;
-  playedOn: string;
+  /** Epoch milliseconds, or NaN while the field is empty. */
+  playedOn: number;
 }
 
 const WHOLE_DOLLARS = /^\d+$/;
 
-function playedOnProblem(playedOn: string, now: number): string | null {
-  const playedOnMillis = fromLocalDateTimeInput(playedOn);
-  if (Number.isNaN(playedOnMillis)) return 'Enter when the Tournament was played.';
-  if (playedOnMillis > now) return "Played on can't be in the future";
+function playedOnProblem(playedOn: number, now: number): string | null {
+  if (Number.isNaN(playedOn)) return 'Enter when the Tournament was played.';
+  if (playedOn > now) return "Played on can't be in the future";
 
   return null;
 }
@@ -37,7 +36,7 @@ export function toCreateTournament(draft: TournamentDraft): CreateTournament {
   if (!draft.winningHand) throw new Error('toCreateTournament needs a draft with no problems, but it has no Winning Hand');
 
   return {
-    playedOn: fromLocalDateTimeInput(draft.playedOn),
+    playedOn: draft.playedOn,
     participantIds: draft.participantIds,
     winnerId: draft.winnerId,
     winningHand: draft.winningHand,

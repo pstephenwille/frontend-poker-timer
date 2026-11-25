@@ -5,6 +5,7 @@ import { LevelSettings } from './level-settings';
 import { TimerExitLink } from './timer-exit-link';
 import { useGameEngine } from '../game-engine';
 import { AccountArea } from '../members/account-area';
+import { EndTournamentButton } from '../tournaments/end-tournament-button';
 
 function TimerControls() {
   const engine = useGameEngine();
@@ -13,6 +14,7 @@ function TimerControls() {
     <div className="controls">
       <button onClick={engine.startPokerGame}>{engine.gameIsRunning? 'Pause': 'Start'}</button>
       <button onClick={engine.resetGame}>Reset</button>
+      <EndTournamentButton />
       <button onClick={engine.toggleBreakIsActive} disabled={!engine.hasGameStarted}>
         {engine.breakIsActive? 'End Break' : 'Take Break'}
       </button>

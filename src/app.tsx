@@ -4,6 +4,8 @@ import './App.css'
 import { BlindsSchedule } from './components/blinds-schedule';
 import { useGameEngine } from './game-engine';
 import { useEffect, useEffectEvent } from 'react';
+import { Route, Routes } from 'react-router';
+import { LeaderboardPage } from './leaderboard/leaderboard-page';
 
 const isTypingInFormField = (target: EventTarget | null) =>
   target instanceof HTMLInputElement
@@ -56,8 +58,10 @@ export function App() {
   return (
     <div className="app">
       <Header />
-      <MainDisplay />
-      <BlindsSchedule />
+      <Routes>
+        <Route path="/" element={<><MainDisplay /><BlindsSchedule /></>} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
+      </Routes>
     </div>
   )
 }

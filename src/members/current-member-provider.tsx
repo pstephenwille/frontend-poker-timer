@@ -1,15 +1,9 @@
-import type { Me } from '@pstephenwille/poker-timer-contracts';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { CurrentMemberContext, type CurrentMemberState } from './current-member';
 import { fetchMe } from './me-api';
 
-export type CurrentMemberState =
-  | { status: 'checking' }
-  | { status: 'signedIn'; me: Me }
-  | { status: 'signedOut' }
-  | { status: 'failed' };
-
 /** Checked once per page load: signing in and out both reload the page. */
-export function useCurrentMember(): CurrentMemberState {
+export function CurrentMemberProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<CurrentMemberState>({ status: 'checking' });
 
   useEffect(function checkWhoIsSignedIn() {
@@ -29,5 +23,5 @@ export function useCurrentMember(): CurrentMemberState {
     };
   }, []);
 
-  return state;
+  return <CurrentMemberContext value={state}>{children}</CurrentMemberContext>;
 }

@@ -1,30 +1,12 @@
-import { useLocation } from 'react-router';
-import { useGameEngine } from '../game-engine';
 import { AccountMenu } from './account-menu';
-import { useCurrentMember } from './use-current-member';
+import { useCurrentMember } from './current-member';
+import { SignInLink } from './sign-in-link';
 
-const SIGN_IN_URL = '/api/auth/login';
-const SIGN_IN_LOCKED_HINT = 'Sign in after the game';
-
-function SignInLink() {
-  const engine = useGameEngine();
-  const { pathname, search } = useLocation();
-
-  if (engine.hasGameStarted) {
-    return <span className="sign-in" aria-disabled="true" title={SIGN_IN_LOCKED_HINT}>Sign in</span>;
-  }
-
-  const returnTo = new URLSearchParams({ returnTo: `${pathname}${search}` });
-
-  return <a className="sign-in" href={`${SIGN_IN_URL}?${returnTo}`}>Sign in</a>;
-}
-
-/** Sign-in reloads the page, so it is held from Start until Reset, like leaving the timer during play. */
 export function AccountArea() {
   const currentMember = useCurrentMember();
 
   if (currentMember.status === 'signedIn') return <AccountMenu me={currentMember.me} />;
-  if (currentMember.status === 'signedOut') return <SignInLink />;
+  if (currentMember.status === 'signedOut') return <SignInLink className="sign-in">Sign in</SignInLink>;
 
   return null;
 }

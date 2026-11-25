@@ -1,4 +1,5 @@
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
+import { LEADERBOARD_PATH, RECORD_TOURNAMENT_PATH, TIMER_PATH } from '../app-paths';
 import { BreakTimer } from './break-timer';
 import { LevelSettings } from './level-settings';
 import { TimerExitLink } from './timer-exit-link';
@@ -25,6 +26,21 @@ function TimerControls() {
   );
 }
 
+const PAGES_LINKED_FROM_HEADER = [
+  { path: TIMER_PATH, label: 'Timer' },
+  { path: LEADERBOARD_PATH, label: 'Leaderboard' },
+  { path: RECORD_TOURNAMENT_PATH, label: 'Record' },
+];
+
+function SiteNavLinks({ isTimerShown }: { isTimerShown: boolean }) {
+  const { pathname } = useLocation();
+  const otherPages = PAGES_LINKED_FROM_HEADER.filter(({ path }) => path !== pathname);
+
+  return otherPages.map(({ path, label }) => isTimerShown
+    ? <TimerExitLink key={path} to={path}>{label}</TimerExitLink>
+    : <Link key={path} to={path}>{label}</Link>);
+}
+
 export function Header({ isTimerShown }: { isTimerShown: boolean }) {
   const engine = useGameEngine();
 
@@ -33,9 +49,7 @@ export function Header({ isTimerShown }: { isTimerShown: boolean }) {
       <div className="header">
         {isTimerShown && <TimerControls />}
         <nav className="site-nav">
-          {isTimerShown
-            ? <TimerExitLink to="/leaderboard">Leaderboard</TimerExitLink>
-            : <Link to="/">Timer</Link>}
+          <SiteNavLinks isTimerShown={isTimerShown} />
           <AccountArea />
         </nav>
       </div>

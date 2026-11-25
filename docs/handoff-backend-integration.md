@@ -51,7 +51,7 @@ Build the UI for the backend in `../backend-poker-timer`. It provides Google sig
 
 25. **Recording while signed out (was Q5 of session 4):** End Tournament works the same whether or not anyone is signed in. It opens `/tournaments/new?playedOn=<ms>`, which carries the known data in the URL. When signed out, the form shows "Sign in to record" in place of its fields; that goes through `/auth/login` with `returnTo` set to the same URL, so `playedOn` survives the trip to Google. The timer has already Reset by then.
 
-26. **Pot is entered directly (was Q6 of session 4):** the form asks for the Pot in whole dollars, starting with the previous Tournament's Pot. Working the Pot out from a Buy-in and the Participants is a future feature.
+26. **Pot is entered directly (was Q6 of session 4):** the form asks for the Pot in whole dollars (amended by Decision 39: it starts empty). Working the Pot out from a Buy-in and the Participants is a future feature.
 
 27. **Form fields follow the contract (was Q7 of session 4):** Participants (Decision 24), a Winner chosen from the checked Participants, a Winning Hand from the ten categories, the Pot (Decision 26), optional Final Hand Opponents chosen from the Participants other than the Winner, an optional Note of up to 500 characters, and an optional **photo** (a file input, so phones can take one with the camera). Save creates the Tournament first and then uploads the photo to it. If the upload fails, the Tournament stays recorded and the form says the photo didn't make it.
 
@@ -69,6 +69,7 @@ Build the UI for the backend in `../backend-poker-timer`. It provides Google sig
 36. **Any Member can record (session 6, 2026-11-25):** any signed-in Member can record a Tournament, whether or not they are one of its Participants. Participants are limited to the group's Members. The app has no way to know who played except the form's checkboxes, so requiring the recorder to be a Participant verified nothing; it only stopped a host who sat out. Backend change: drop `recorder_not_participant` from `POST /api/tournaments`, and the rule that `PATCH` must keep the recorder among the Participants, with their tests and the openspec proposal, design, tasks and `tournament-records` spec. `recordedById` still records who recorded it, and editing and deleting are still limited to the recorder or an admin. This amends Decision 33's "a host who sat a game out has it recorded from a player's phone".
 37. **The Winner is what matters; Participants are bookkeeping (session 6, 2026-11-25):** of the players in a Tournament, only the finalists matter to the group, and above all the Winner. The Participant checkboxes stay on the form (Decision 24) only because the Leaderboard's Played and Win rate columns count them and the backend requires at least two, with the Winner among them; ranking itself uses wins alone. Dropping Participants, and with them Played and Win rate, was considered and rejected.
 38. **Participants start unchecked (session 6, 2026-11-25):** every Participant checkbox starts unchecked, and the recorder checks who played. The app can't know who played, so checking the previous Tournament's Participants was only a guess that could go wrong unnoticed. Checking every Member was also rejected, since it overcounts as the group grows. This replaces Decision 24's "the previous Tournament's Participants are checked by default".
+39. **The Pot starts empty (session 6, 2026-11-25):** the recorder types the Pot every time. It is the one number that changes winnings on the Leaderboard, so it should be entered deliberately, and a carried-over value is easy to accept without reading. With Decision 38, the form no longer needs the previous Tournament at all. This replaces Decision 26's "starting with the previous Tournament's Pot".
 
 ## Frontend renames (step 1 of Decision 21)
 
@@ -175,10 +176,10 @@ One PR per row, each on its own branch from the latest `master`, built in order.
    - Signed out, the page shows "Sign in to record", linking to `/api/auth/login` with `returnTo` set to the page's URL, including `?playedOn`.
    - Signed in, it shows the form and not the prompt.
    - The header's "Record" link opens the page from Not Started and Paused, and is disabled while Running or On Break (Decision 31).
-2. **Recording with the required fields** (Decisions 24, 26, 27, 30 and 38). Participants come from `GET /api/members` and the previous Tournament from `GET /api/tournaments`; Save calls `POST /api/tournaments`.
+2. **Recording with the required fields** (Decisions 24, 26, 27, 30, 38 and 39). Participants come from `GET /api/members`; Save calls `POST /api/tournaments`.
    - Only active Members are listed, all unchecked.
    - The Winner choices are only the checked Participants, and unchecking the chosen Winner clears it.
-   - The Pot starts at the previous Tournament's Pot. With no previous Tournament, it's empty.
+   - The Pot starts empty, and Save is blocked until it holds a whole number of dollars of at least 0.
    - Played on comes from `?playedOn` in local time, or now when there's none. A future time shows "Played on can't be in the future" and doesn't save.
    - Save is blocked with fewer than two Participants or no Winner.
    - A valid save sends the expected `CreateTournament` body and lands on `/leaderboard`.

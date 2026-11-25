@@ -103,7 +103,7 @@ Against an ordinary stage, sign-in can't complete from localhost: Google returns
 - A Note of only spaces is left out of the request.
 - The Leaderboard's highlight survives a reload straight after a save, because browsers keep location state.
 - A photo of the wrong type, or over 10 MB, is refused before saving, since storage would refuse it only after the Tournament was recorded.
-- End Tournament's confirmation is the browser's own `window.confirm`.
+- End Tournament no longer asks for confirmation (Decision 50).
 - A failed refresh of the Participant list keeps the list already shown, with a notice.
 
 ## Sessions

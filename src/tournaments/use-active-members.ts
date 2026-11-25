@@ -1,33 +1,49 @@
 import type { MemberSummary } from '@pstephenwille/poker-timer-contracts';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchMembers } from './members-api';
 
 export type ActiveMembersState =
   | { status: 'loading' }
-  | { status: 'loaded'; members: MemberSummary[] }
+  | { status: 'loaded'; members: MemberSummary[]; refreshFailed: boolean }
   | { status: 'failed' };
 
 /** Deactivated Members can't be recorded as playing, so they are left off the list. */
-export function useActiveMembers(): ActiveMembersState {
+async function fetchActiveMembers() {
+  const members = await fetchMembers();
+
+  return members.filter((member) => member.active);
+}
+
+/**
+ * Refreshed whenever the window regains focus, so a player who has just registered on
+ * their own phone appears without a reload. A failed refresh keeps the list already shown.
+ */
+export function useActiveMembers(): ActiveMembersState & { refresh: () => void } {
   const [state, setState] = useState<ActiveMembersState>({ status: 'loading' });
+  const isMountedRef = useRef(true);
 
-  useEffect(function loadMembersOnMount() {
-    let isStillMounted = true;
-
-    fetchMembers()
+  const refresh = useCallback(() => {
+    fetchActiveMembers()
       .then((members) => {
-        const activeMembers = members.filter((member) => member.active);
-        if (isStillMounted) setState({ status: 'loaded', members: activeMembers });
+        if (isMountedRef.current) setState({ status: 'loaded', members, refreshFailed: false });
       })
       .catch((error: unknown) => {
         console.error('The Members could not be loaded', error);
-        if (isStillMounted) setState({ status: 'failed' });
+        if (!isMountedRef.current) return;
+        setState((current) => current.status === 'loaded' ? { ...current, refreshFailed: true } : { status: 'failed' });
       });
-
-    return () => {
-      isStillMounted = false;
-    };
   }, []);
 
-  return state;
+  useEffect(function loadMembersNowAndOnFocus() {
+    isMountedRef.current = true;
+    refresh();
+    window.addEventListener('focus', refresh);
+
+    return () => {
+      isMountedRef.current = false;
+      window.removeEventListener('focus', refresh);
+    };
+  }, [refresh]);
+
+  return { ...state, refresh };
 }

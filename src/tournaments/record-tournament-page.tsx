@@ -1,14 +1,23 @@
-import { useCurrentMember } from '../members/current-member';
+import { ACCOUNT_CHECK_FAILED_MESSAGE, useCurrentMember } from '../members/current-member';
+import { RegisterQrCode } from '../members/register-qr-code';
 import { SignInLink } from '../members/sign-in-link';
 import { RecordTournamentForm } from './record-tournament-form';
 
-const ACCOUNT_CHECK_FAILED_MESSAGE = "Couldn't check whether you're signed in. Reload the page to try again.";
+/** The host signs in on the timer's device while new players scan the code to register on theirs. */
+function SignInToRecord() {
+  return (
+    <>
+      <SignInLink className="sign-in-to-record">Sign in to record</SignInLink>
+      <RegisterQrCode />
+    </>
+  );
+}
 
 function RecordTournamentContent() {
   const currentMember = useCurrentMember();
 
   if (currentMember.status === 'signedIn') return <RecordTournamentForm />;
-  if (currentMember.status === 'signedOut') return <SignInLink className="sign-in-to-record">Sign in to record</SignInLink>;
+  if (currentMember.status === 'signedOut') return <SignInToRecord />;
   if (currentMember.status === 'failed') return <p role="alert">{ACCOUNT_CHECK_FAILED_MESSAGE}</p>;
 
   return null;

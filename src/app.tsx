@@ -7,8 +7,9 @@ import { Route, Routes, useLocation } from 'react-router';
 import { LeaderboardPage } from './leaderboard/leaderboard-page';
 import { SigninErrorBanner } from './members/signin-error-banner';
 import { CurrentMemberProvider } from './members/current-member-provider';
+import { MePage } from './members/me-page';
 import { RecordTournamentPage } from './tournaments/record-tournament-page';
-import { LEADERBOARD_PATH, RECORD_TOURNAMENT_PATH, TIMER_PATH } from './app-paths';
+import { LEADERBOARD_PATH, ME_PATH, RECORD_TOURNAMENT_PATH, TIMER_PATH } from './app-paths';
 
 const isTypingInFormField = (target: EventTarget | null) =>
   target instanceof HTMLInputElement
@@ -70,6 +71,7 @@ export function App() {
           <Route path={TIMER_PATH} element={null} />
           <Route path={LEADERBOARD_PATH} element={<LeaderboardPage />} />
           <Route path={RECORD_TOURNAMENT_PATH} element={<RecordTournamentPage />} />
+          <Route path={ME_PATH} element={<MePage />} />
         </Routes>
       </div>
     </CurrentMemberProvider>

@@ -1,6 +1,6 @@
 # Handoff: building the frontend on the backend
 
-Status as of 2026-11-25, after session 6. Slices 1 and 2 are merged, deployed to `dev` and checked against the real backend. Slice 3 is planned and its first PR is open; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
+Status as of 2026-11-25, after session 7. Slices 1 and 2 are merged, deployed to `dev` and checked against the real backend. Slice 3 is built, with its last PR open, but not yet deployed or tried against the real backend; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
 
 To reopen the design, run `/mattpocock-skills:grill-with-docs` and point it at this file. Ask questions **one at a time**, each with a recommended answer, and record each answer here and in `GLOSSARY.md` as soon as it is given. The backend repo (`../backend-poker-timer`) is read only for facts; this repo is where the design lives.
 
@@ -70,6 +70,8 @@ Build the UI for the backend in `../backend-poker-timer`. It provides Google sig
 37. **The Winner is what matters; Participants are bookkeeping (session 6, 2026-11-25):** of the players in a Tournament, only the finalists matter to the group, and above all the Winner. The Participant checkboxes stay on the form (Decision 24) only because the Leaderboard's Played and Win rate columns count them and the backend requires at least two, with the Winner among them; ranking itself uses wins alone. Dropping Participants, and with them Played and Win rate, was considered and rejected.
 38. **Participants start unchecked (session 6, 2026-11-25):** every Participant checkbox starts unchecked, and the recorder checks who played. The app can't know who played, so checking the previous Tournament's Participants was only a guess that could go wrong unnoticed. Checking every Member was also rejected, since it overcounts as the group grows. This replaces Decision 24's "the previous Tournament's Participants are checked by default".
 39. **The Pot starts empty (session 6, 2026-11-25):** the recorder types the Pot every time. It is the one number that changes winnings on the Leaderboard, so it should be entered deliberately, and a carried-over value is easy to accept without reading. With Decision 38, the form no longer needs the previous Tournament at all. This replaces Decision 26's "starting with the previous Tournament's Pot".
+40. **The register QR code is drawn with `qrcode.react` (session 7, 2026-11-25):** its `QRCodeSVG` draws the code in the browser as inline SVG, which works in the jsdom tests and stays sharp on the host's screen. It has no dependencies and supports React 19. `qrcode` (which brings CLI and PNG dependencies) and `uqr` (still 0.x) were rejected. Nothing runs in the backend: the code holds the sign-in URL, built on the device from its own origin.
+41. **A placeholder `/me` until slice 4 (session 7, 2026-11-25):** a player who registers from the QR code returns to `/me` (Decision 35), which slice 3 PR 7 adds as a placeholder. Signed in, it says "You're registered, <display name>. The host can now check you on the Record form." Signed out, it offers Sign in. Slice 4 replaces its contents. Returning to the Leaderboard instead was rejected, because it doesn't confirm that registering worked.
 
 ## Frontend renames (step 1 of Decision 21)
 
@@ -127,6 +129,8 @@ Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds)
 
 Session 6 (2026-11-25) checked slice 2 against a personal stage and then `dev`, deployed the frontend to `dev`, split slice 3 into seven PRs, opened its first one, and settled Decisions 36–39 while preparing PR 2.
 
+Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7 and settled Decisions 40 and 41 for PR 7.
+
 ### Done
 
 - **Step 1 (frontend refactor):** Round → Level, `setStartingBlind`, the Color-up Break after the 15 blind, and "Take Break" disabled until Start. Merged as PR #5.
@@ -155,24 +159,36 @@ Session 6 (2026-11-25) checked slice 2 against a personal stage and then `dev`, 
 - **Backend PR #22 (`local-frontend-origin`)** merged as `69c7cb4`, and its Deliver run redeployed `dev` and `prod`.
 - **The frontend is on `dev`** from master at `526b16f` (see **Deploying the frontend by hand**).
 - **Decisions 36–39** (session 6): any Member can record; the Winner is what matters and Participants are bookkeeping; Participants start unchecked; the Pot starts empty.
+- **Slice 3 (recording a Tournament)**, one PR per task of the **Slice 3 plan**:
+  - PR 1, the Record page: #21.
+  - PR 2, the required fields: #22, with #23 keeping Played on's exact instant unless it's edited.
+  - PR 3, Final Hand Opponents and the Note: #24.
+  - PR 4, the new Winner highlighted after a save: #25.
+  - PR 5, the photo: #26.
+  - PR 6, End Tournament: #27.
+  - PR 7, registering at the table, with the placeholder `/me`: open as of the end of session 7.
+- **Decisions 40 and 41** (session 7): the QR code is drawn with `qrcode.react`; `/me` is a placeholder until slice 4.
 
-### Open PRs, as of the end of session 6
+### Choices made while building slice 3, for review
 
-- **Frontend PR #20 (`docs/slice-3-split`):** the slice 3 plan, Decisions 36–39 and this status. Docs only.
-- **Frontend PR #21 (`feat/record-tournament-page`):** slice 3 PR 1, from `master`. Beyond the plan, it makes these choices for review:
-  - "Sign in to record" is disabled from Start until Reset, like the header's Sign in (Decision 32), because sign-in reloads the page.
-  - If the account check fails, the page says "Couldn't check whether you're signed in. Reload the page to try again."
-  - The header links to every page except the current one, so the timer shows Leaderboard and Record.
-  - The `/api/me` check moved into `CurrentMemberProvider` (`src/members/current-member-provider.tsx`), shared by the header and the page; `SignInLink` (`src/members/sign-in-link.tsx`) is shared by both Sign in links; page paths live in `src/app-paths.ts`.
+- Save is never disabled; it lists every problem in the form when pressed.
+- A Note of only spaces is left out of the request.
+- The highlight on the Leaderboard survives a reload straight after a save, because browsers keep location state.
+- A photo of the wrong type, or over 10 MB, is refused before saving, since storage would refuse it only after the Tournament was recorded.
+- End Tournament's confirmation is the browser's own `window.confirm`.
+- A failed refresh of the Participant list keeps the list already shown, with a notice.
 
 ### Next
 
-1. **Review and merge PRs #20 and #21.**
-2. **Slice 3 PR 2, recording with the required fields,** from the latest `master` once #21 is merged. Its design is settled (see **Slice 3 plan**).
-3. **The backend change for Decision 36,** a backend PR that can go in any time. Until it ships, a recorder who isn't a Participant sees the backend's `recorder_not_participant` refusal through PR 2's error message.
-4. **Slice 3 PRs 3–7, in order.** Still undecided: which QR code library to use, for PR 7.
-5. **Then deploy to `prod` and run backend task 14.3** through the real UI.
-6. **Slice 4 (profile and avatar) and the admin UI** still need designing.
+1. **Review and merge slice 3 PR 7.**
+2. **The backend change for Decision 36,** a backend PR that can go in any time. Until it ships, a recorder who isn't a Participant sees "You can only record a tournament you played in".
+3. **Deploy slice 3 to `dev` and check it there** (see **Deploying the frontend by hand**). Photo uploads can't be checked from `pnpm dev`, because the media bucket's CORS allows only the stage's own origin. Check:
+   - End Tournament, then recording with a photo, lands on the Leaderboard with the Winner highlighted.
+   - The photo appears on the Tournament, including one taken on an iPhone (some browsers give `.heic` files no type, which the form would refuse).
+   - Scanning the QR code with a phone registers and lands on `/me`, and the new Member appears on the form when the timer's window is focused again.
+   - The six timer buttons wrap sensibly on a narrow screen.
+4. **Then deploy to `prod` and run backend task 14.3** through the real UI.
+5. **Slice 4 (profile and avatar) and the admin UI** still need designing. Slice 4 replaces the placeholder `/me`, and adds Me to the account menu (Decision 33).
 
 ### Running the frontend against a personal stage
 

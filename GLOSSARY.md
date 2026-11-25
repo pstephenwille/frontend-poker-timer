@@ -1,6 +1,6 @@
 # Poker Timer
 
-A blind clock for a home group's in-person Texas Hold'em tournaments, which also honours the group's winners.
+A blind clock for a home group's in-person Texas Hold'em tournaments, which also honors the group's winners.
 
 ## Language
 
@@ -40,11 +40,11 @@ _Avoid_: User, player (when meaning someone with an account), account
 
 **Register**:
 To become a Member by signing in for the first time; it is done once, not for each Tournament.
-_Avoid_: Sign up, join, enrol
+_Avoid_: Sign up, join, enroll
 
 **Host**:
 The Member who runs the timer at the table and records each Tournament when it ends.
-_Avoid_: Admin (a separate role), dealer, organiser
+_Avoid_: Admin (a separate role), dealer, organizer
 
 **Participant**:
 A Member who played in a given Tournament; every recorded Tournament has at least two.
@@ -77,7 +77,7 @@ The money a player puts in to play a Tournament; together the Buy-ins make up th
 _Avoid_: Entry fee, stake
 
 **Last Winner**:
-The Winner of the most recently played Tournament, honoured for that one win until the next Tournament is recorded.
+The Winner of the most recently played Tournament, honored for that one win until the next Tournament is recorded.
 _Avoid_: Reigning Champion, latest champion, defending champ
 
 **Leaderboard**:

@@ -1,6 +1,6 @@
 # Handoff: building the frontend on the backend
 
-Status as of 2026-11-25, after session 7. Slices 1 and 2 are merged, deployed to `dev` and checked against the real backend. Slice 3 is merged, deployed to `dev` and checked there, and the backend lets any Member record; next is the `prod` deploy and backend task 14.3; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
+This file holds the design: the goal, the backend facts that shape the UI, and every Decision by number. Terms that are settled are in `GLOSSARY.md`. Progress and the remaining work are in OpenSpec (see **Where the work is** at the end). Slices 1–3 are built, merged and checked on `dev`, as of 2026-11-25 after session 7.
 
 To reopen the design, run `/mattpocock-skills:grill-with-docs` and point it at this file. Ask questions **one at a time**, each with a recommended answer, and record each answer here and in `GLOSSARY.md` as soon as it is given. The backend repo (`../backend-poker-timer`) is read only for facts; this repo is where the design lives.
 
@@ -75,37 +75,7 @@ Build the UI for the backend in `../backend-poker-timer`. It provides Google sig
 
 ## Frontend renames (step 1 of Decision 21)
 
-Files: `round-timer.tsx` → `level-timer.tsx`, `round-settings.tsx` → `level-settings.tsx`.
-
-| Now | Becomes | Where |
-|---|---|---|
-| `RoundTimer` | `LevelTimer` | `round-timer.tsx`, `main-display.tsx` |
-| `RoundSettings` | `LevelSettings` | `round-settings.tsx`, `header.tsx` |
-| `currentRound` | `currentLevel` | `game-engine.ts`, `round-timer.tsx`, `blinds-schedule.tsx` |
-| `incrementCurrentRound` | `incrementCurrentLevel` | `game-engine.ts`, `round-timer.tsx` |
-| `roundCount` (reducer arg) | `levelCount` | `game-engine.ts` |
-| `roundDurationSeconds` / `setRoundDurationSeconds` | `levelDurationSeconds` / `setLevelDurationSeconds` | `game-engine.ts`, `main-display.tsx`, `round-timer.tsx`, `round-settings.tsx`, `blinds-schedule.tsx` |
-| `DEFAULT_ROUND_SECONDS` | `DEFAULT_LEVEL_SECONDS` | `utils.ts`, `game-engine.ts` |
-| `ROUND_TIMES` | `LEVEL_TIMES` | `utils.ts`, `round-settings.tsx` |
-| `roundEndAudioRef` | `levelEndAudioRef` | `game-engine.ts`, `game-engine-context.tsx`, `round-timer.tsx` |
-| `setStartingChips(chips)` | `setStartingBlind(startingBlind)` | `game-engine.ts`, `round-settings.tsx` |
-| `setRoundTime` | `setLevelTime` | `round-settings.tsx` |
-| `getBlindForRound(blinds, round)` | `getBlindForLevel(blinds, level)` | `round-timer.tsx` |
-| `isColorUpDue(completedRound, …)` | `isColorUpBreakDue(completedLevel, …)` | `round-timer.tsx` |
-| `isOpeningRound` | `isOpeningLevel` | `round-timer.tsx` |
-| `completedRound` | `completedLevel` | `round-timer.tsx` |
-| `celebrateRoundEnd` | `celebrateLevelEnd` | `round-timer.tsx` |
-| `advanceToNextRound` | `advanceToNextLevel` | `round-timer.tsx` |
-| `PAUSE_BETWEEN_ROUNDS_MILLIS` | `PAUSE_BETWEEN_LEVELS_MILLIS` | `round-timer.tsx` |
-| `isPausedBetweenRounds` | `isPausedBetweenLevels` | `round-timer.tsx` |
-| `advanceAfterPauseBetweenRounds` | `advanceAfterPauseBetweenLevels` | `round-timer.tsx` |
-| `pauseBetweenRounds` (also used after the Break horn) | `runAfterDelay` | `utils.ts`, `round-timer.tsx`, `break-timer.tsx` |
-| `keepRoundClockPausedForWholeBreak` | `keepLevelClockPausedForWholeBreak` | `break-timer.tsx` |
-| `SMALL_BLIND_THAT_RETIRES_LOWEST_CHIPS = 25` | same name, value `15` (Decision 8) | `round-timer.tsx` |
-
-On screen: "Round: N" → "Level: N"; "Round time" → "Level time"; "N min Round" → "N min Level".
-
-Unchanged: `roundUpToWholeSeconds` in `use-countdown.ts` (arithmetic rounding, not a poker Round).
+Round → Level throughout the frontend, `setStartingChips` → `setStartingBlind`, and the screen's "Round: N", "Round time" and "N min Round" → Level. Done in PR #5. The full rename table is in this file's history, before PR #31. `roundUpToWholeSeconds` in `use-countdown.ts` keeps its name, since it means arithmetic rounding, not a poker Round.
 
 ## Game lifecycle (as the code behaves, not up for change)
 
@@ -121,164 +91,9 @@ Unchanged: `roundUpToWholeSeconds` in `use-countdown.ts` (arithmetic rounding, n
 
 These are UI states, not domain terms, so they stay out of `GLOSSARY.md`.
 
-## Status
+## Where the work is
 
-Session 4 (2026-11-24) designed slices 2 and 3, sign-in and recording a Tournament (Decisions 23–35). Slice 4, profile and avatar (including the `/me` page's contents), and the admin UI remain undesigned. Next step is implementation, starting with step 1 of Decision 21.
+- **`openspec/changes/continue-backend-integration/`** carries the remaining work: the `prod` deploy, backend task 14.3, slice 4 (profile and avatar), the admin UI and loose ends. Its `handoff.md` is the place to start on a new machine. It has setup, stages, deploy steps, how the work is run, everything done so far by PR, and a log of each session.
+- **`openspec/changes/require-only-winner/`** proposes recording a Tournament with only its Winner, which reopens Decision 37. It isn't designed yet; its `design.md` lists the open questions.
+- Run `openspec list` for progress, and `openspec validate --all --strict` after editing either change. New Decisions are numbered from 42 and recorded in this file.
 
-Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds) was skipped, so slice 4 is still undesigned. It then implemented Decision 21 through slice 2.
-
-Session 6 (2026-11-25) checked slice 2 against a personal stage and then `dev`, deployed the frontend to `dev`, split slice 3 into seven PRs, opened its first one, and settled Decisions 36–39 while preparing PR 2.
-
-Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7, settled Decisions 40 and 41 for PR 7, deployed slice 3 to `dev` and checked it there, and made the backend change for Decision 36.
-
-### Done
-
-- **Step 1 (frontend refactor):** Round → Level, `setStartingBlind`, the Color-up Break after the 15 blind, and "Take Break" disabled until Start. Merged as PR #5.
-- **Step 2 (backend contracts 1.0.0):**
-  - `finalHandOpponentIds`, `lastWonAt`, the most-recent-win tiebreak and distinct ranks.
-  - The column rename, with ADR `docs/adr/0001-rename-opponent-column-in-one-migration.md` in the backend.
-  - Openspec tasks 16.1–16.3.
-  - Merged as backend PR #21. It's published to GitHub Packages and deployed to `dev` and `prod`.
-- **Slice 1 (read-only Leaderboard):** PRs #6–#11.
-  - Vitest and the contracts package.
-  - `pickHonors`.
-  - The `/leaderboard` page.
-  - The Last Winner and Reigning Champion cards.
-  - Navigation that holds the table during play (Decision 31).
-  - Styles, with the Leaderboard dropping columns below 600px.
-- **Slice 2 (sign-in and sign-out):** PRs #13–#15, after the Decision 33 amendment in PR #12.
-  - The header shows the signed-in Member, or Sign in with `returnTo`.
-  - Full sign-out through Cognito.
-  - Both are disabled from Start until Reset.
-  - The sign-in error banner (Decision 35).
-- **Slice 2 checked against the real backend** (session 6, 2026-11-25), from `pnpm dev` on the `stephen` personal stage and then on `dev`:
-  - Passed: signing in shows your avatar.
-  - Passed: Sign out ends both sessions and returns to the same site; the next Sign in goes to Google.
-  - Passed: Sign out is disabled while a game runs and is enabled again after Reset.
-  - Skipped both times: cancelling at Google shows "Sign-in was cancelled." It's still unchecked anywhere. Google shows Cancel only on its consent screen, which it skips once consent is given; use a private window or remove the app at https://myaccount.google.com/connections to see it.
-- **Backend PR #22 (`local-frontend-origin`)** merged as `69c7cb4`, and its Deliver run redeployed `dev` and `prod`.
-- **The frontend is on `dev`** from master at `7b6882f`, with all of slice 3 (see **Deploying the frontend by hand**).
-- **Decisions 36–39** (session 6): any Member can record; the Winner is what matters and Participants are bookkeeping; Participants start unchecked; the Pot starts empty.
-- **Slice 3 (recording a Tournament)**, one PR per task of the **Slice 3 plan**:
-  - PR 1, the Record page: #21.
-  - PR 2, the required fields: #22, with #23 keeping Played on's exact instant unless it's edited.
-  - PR 3, Final Hand Opponents and the Note: #24.
-  - PR 4, the new Winner highlighted after a save: #25.
-  - PR 5, the photo: #26.
-  - PR 6, End Tournament: #27.
-  - PR 7, registering at the table, with the placeholder `/me`: #28.
-- **Decisions 40 and 41** (session 7): the QR code is drawn with `qrcode.react`; `/me` is a placeholder until slice 4.
-- **Backend PR #23 (`any-member-can-record`, Decision 36)** merged as `6ccec59`, with openspec task 17.1. Its Deliver run deployed `dev` and `prod` on 2026-11-25. No contracts release was needed.
-- **Slice 3 checked on `dev`** (session 7, 2026-11-25), from `7b6882f` against backend `6ccec59`. All passed:
-  - End Tournament, then recording with a photo, lands on the Leaderboard with the Winner highlighted.
-  - The photo appears on the Tournament, including one taken on an iPhone.
-  - Scanning the QR code with a phone registers and lands on `/me`, and the new Member appears on the form when the timer's window is focused again.
-  - The six timer buttons wrap sensibly on a narrow screen.
-
-### Choices made while building slice 3, for review
-
-- Save is never disabled; it lists every problem in the form when pressed.
-- A Note of only spaces is left out of the request.
-- The highlight on the Leaderboard survives a reload straight after a save, because browsers keep location state.
-- A photo of the wrong type, or over 10 MB, is refused before saving, since storage would refuse it only after the Tournament was recorded.
-- End Tournament's confirmation is the browser's own `window.confirm`.
-- A failed refresh of the Participant list keeps the list already shown, with a notice.
-
-### Next
-
-1. **Deploy the frontend to `prod` and run backend task 14.3** through the real UI (see **Deploying the frontend by hand**).
-2. **Slice 4 (profile and avatar) and the admin UI** still need designing. Slice 4 replaces the placeholder `/me`, and adds Me to the account menu (Decision 33).
-
-### Future work
-
-- **Only the Winner should be required when recording** (noted in session 7, 2026-11-25; not yet designed). Today a Tournament needs at least two Participants with the Winner among them. Recording should need only the Winner; other Participants stay optional. This reopens Decision 37, which kept the two-Participant minimum because the backend requires it and the Leaderboard's Played and Win rate count Participants. Designing it needs answers to:
-  - Is the Winner then always counted as a Participant, so Played and Win rate stay meaningful?
-  - What happens to Played and Win rate for players who aren't checked?
-
-  It touches the backend and the frontend:
-  - **Backend:** `MIN_PARTICIPANTS` and the winner ∈ participants rule in the contracts (`packages/contracts/src/tournament.ts`), the `tournament-records` spec and its tests, and a contracts release.
-  - **Frontend:** the "Check at least two Participants." rule in `src/tournaments/tournament-draft.ts`, and the Winner choices, which today come only from the checked Participants.
-
-### Running the frontend against a personal stage
-
-Against an ordinary stage, sign-in can't complete from localhost: Google returns to the stage's own address, and the backend refuses a `POST` whose `Origin` is localhost. A personal stage deployed with `LOCAL_FRONTEND_ORIGIN` serves localhost instead (backend `README.md`, "Serve a local frontend dev server from a personal stage").
-
-1. **Check the AWS credentials** with a read-only `aws sts get-caller-identity`. It should show user `swille` in account `512808912517`.
-2. **Deploy the personal stage:** `LOCAL_FRONTEND_ORIGIN=http://localhost:3333 pnpm sst deploy --stage stephen` in the backend repo. The `stephen` stage's four SST secrets (`DatabaseUrl`, `GoogleClientId`, `GoogleClientSecret`, `SigninCookieKey`) are set; `pnpm sst secret list --stage stephen` lists them, but prints their values. It was last deployed on 2026-11-25 from `2ca0fea`; its frontend bucket is `poker-timer-stephen-frontendbucket-ubscxsen` and its distribution is `E1D10KR82CPHON`.
-3. **Run the frontend against it:** `API_ORIGIN=https://dtp80nyn4zjug.cloudfront.net pnpm dev`. Use the URL `sst deploy` prints if it differs. A `pnpm dev` started without `API_ORIGIN` proxies to `dev`, so sign-in ends on `dev`'s placeholder page.
-
-### Slice 3 plan
-
-One PR per row, each on its own branch from the latest `master`, built in order. Every test renders the app through `src/testing/render-app.tsx` against `src/testing/fake-backend.ts` and checks what a person sees and does. Each PR passes `pnpm test`, `pnpm lint` and `pnpm build` before it goes up.
-
-1. **The `/tournaments/new` page and its header link** (Decisions 23 and 25).
-   - Signed out, the page shows "Sign in to record", linking to `/api/auth/login` with `returnTo` set to the page's URL, including `?playedOn`.
-   - Signed in, it shows the form and not the prompt.
-   - The header's "Record" link opens the page from Not Started and Paused, and is disabled while Running or On Break (Decision 31).
-2. **Recording with the required fields** (Decisions 24, 26, 27, 30, 38 and 39). Participants come from `GET /api/members`; Save calls `POST /api/tournaments`.
-   - Only active Members are listed, all unchecked.
-   - The Winner choices are only the checked Participants, and unchecking the chosen Winner clears it.
-   - The Pot starts empty, and Save is blocked until it holds a whole number of dollars of at least 0.
-   - Played on comes from `?playedOn` in local time, or now when there's none. A future time shows "Played on can't be in the future" and doesn't save.
-   - Save is blocked with fewer than two Participants or no Winner.
-   - A valid save sends the expected `CreateTournament` body and lands on `/leaderboard`.
-   - A backend error keeps the form filled and shows the message.
-3. **Final Hand Opponents and Note** (Decision 27).
-   - The opponent choices are the Participants other than the Winner. Changing the Winner removes them from the opponents.
-   - The Note stops at 500 characters.
-   - Both are left out of the request body or sent empty when unused, and sent as entered when used.
-4. **After a save** (Decision 28).
-   - `/leaderboard` highlights the new Winner's row, and only right after a save.
-   - Going back to the timer fetches the Leaderboard again, so both cards show the new Tournament.
-   - Moving between pages without saving also fetches it again each time the timer screen is shown.
-5. **The photo** (Decisions 27 and 29). The upload is `POST /api/tournaments/:id/photo/uploads` for a grant, a multipart post of the grant's fields and the file to its URL, then `POST /api/tournaments/:id/photo` with the `mediaId`.
-   - Save creates the Tournament, then requests the grant, posts the file and confirms the upload, in that order.
-   - A failed upload shows "Tournament recorded. The photo didn't upload.", locks the other fields and never sends a second `POST /api/tournaments`.
-   - Try again reuses the same file and Tournament, and goes on to `/leaderboard` once it succeeds.
-   - Skip photo goes to `/leaderboard`.
-   - Saving without a photo makes no upload calls.
-6. **End Tournament on the timer** (Decision 23).
-   - It's disabled at Not Started and enabled while Running or Paused.
-   - Cancelling the confirmation leaves the clock and settings as they were.
-   - Confirming Resets the timer to Not Started and opens `/tournaments/new?playedOn=<ms>` at the moment the Tournament ended, using a fake clock.
-   - Leaving the form afterwards doesn't touch the timer.
-7. **Registering at the table** (Decisions 34 and 35).
-   - The QR code shows on the form and on the signed-out prompt, and encodes the sign-in URL that returns to `/me`.
-   - Focusing the window again, or pressing Refresh, adds a newly registered Member and keeps the boxes already checked and the fields already filled.
-   - The note says players without an account can't be recorded.
-
-### Deploying the frontend by hand
-
-The `dev` stage is https://d3qe36cyda6430.cloudfront.net, and `prod` is https://d228ov3aayfbkh.cloudfront.net. The backend's `README.md` gives the steps.
-
-1. Find the stage's `frontendBucket` and `distributionId`. `sst deploy` prints them, or find them with `aws cloudfront list-distributions`: match the stage's domain and read its S3 origin.
-2. Run `pnpm build`.
-3. Run `aws s3 sync dist/ s3://<frontendBucket>/ --delete`. That replaces the placeholder `index.html`.
-4. Run `aws cloudfront create-invalidation --distribution-id <distributionId> --paths "/*"`.
-
-Credentials for AWS account `512808912517` are needed in the environment, exported before the editor or Claude Code starts. This needs AWS CLI v2.
-
-The SST Router's CloudFront origin is `placeholder.sst.dev`, not the bucket, so find the bucket by name with `aws s3api list-buckets` instead. For `dev`, the bucket is `poker-timer-dev-frontendbucket-htazhobe` and the distribution is `E1J1N6X6GCOF47`.
-
-On 2026-11-25 the frontend was deployed to `dev` from master at `7b6882f`, with all of slice 3, replacing the `526b16f` build. Nothing has been uploaded to `prod` yet.
-
-### Setting up a new machine
-
-- **Node 24 and pnpm.** Run `pnpm install`, then `pnpm test`, `pnpm lint` and `pnpm build`.
-- **Installing the contracts from GitHub Packages needs a token,** even though the package is public:
-  - Create a classic personal access token with only `read:packages`, and export it as `GITHUB_TOKEN` before starting the editor or Claude Code.
-  - Add `//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}` to `~/.npmrc`. pnpm ignores tokens from environment variables in a project `.npmrc`, which names only the registry.
-- **`pnpm dev`** serves on port 3333 and proxies `/api` to `dev`, or to `API_ORIGIN` when it's set.
-- **AWS CLI v2,** with the credentials above, for deploys and the personal stage.
-- **The `gh` CLI.** Without sudo, install the release binary into `~/.local/bin` after checking it against the release's checksums file. `gh` prefers `GITHUB_TOKEN` over its own login, and that token only reads packages, so sign in with `env -u GITHUB_TOKEN gh auth login` and run every `gh` command as `env -u GITHUB_TOKEN gh …`.
-- **Both repos side by side:** this one and `../backend-poker-timer`, each on an up-to-date `master`.
-
-### How the work is run
-
-- **One branch and PR per task.** Each starts from `master` once the previous PR is merged.
-- **Sync before starting and before every push.** Fetch, and check the branch's PR with `gh pr view`. PRs here are often merged within minutes, and GitHub then deletes the branch; never push to a merged PR's branch, start a new one from the latest `master` instead. Check PR and deploy state on GitHub rather than trusting this file.
-- **One step at a time.** Stop after each step for review.
-- **Diffable edits.** Make file changes with diffable edits, not shell rewrites.
-- **Test-first,** with tests at agreed seams. So far that's the whole app rendered with `fetch` answered by `src/testing/fake-backend.ts`, plus pure functions like `pickHonors`.
-- **US spelling and wording** (honors, color, checked rather than ticked).
-- **Design questions one at a time,** each with a recommended answer, and only where the code or decisions leave it unclear. Record each answer here as soon as it's given.

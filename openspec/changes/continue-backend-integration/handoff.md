@@ -8,7 +8,9 @@ Status as of 2026-11-25, after session 8, for picking up on another machine or i
 - **The frontend is on `dev`** from `master` at `7b6882f`, and **on `prod`** from `master` at `cc64bef` (task 1.1). The app code is the same in both; only docs changed between them.
 - **The backend** is at `6ccec59` on `dev` and `prod`, with contracts `1.0.0`, and lets any Member record (Decision 36). Its change `add-mvp-backend` has two open tasks: 14.1 (custom domain) and 14.3 (the `prod` check through this UI).
 - **Slice 4 is designed** (Decisions 42–45, the `member-profile` spec) and split into tasks 2.2–2.8. One needs a backend change: `avatarStatus` on `Me`, as contracts 1.1.0 (task 2.5).
-- **Next:** task 2.2, Me in the account menu. Task 1.2 (backend task 14.3) is on hold until a second Google account is available or `require-only-winner` lands.
+- **Next:** task 2.2, Me in the account menu, not yet started: no branch is pushed. The menu is `src/members/account-menu.tsx`, its tests are in `src/members/sign-out.test.tsx` and `account.test.tsx`, and the requirements are in `specs/account-menu/spec.md`. Build it test-first.
+- **On hold:** task 1.2 (backend task 14.3), until a second Google account is available or `require-only-winner` lands. `prod` has one Member and no Tournaments.
+- **To settle in task 2.3:** replacing the placeholder `/me` drops its "You're registered, <display name>. The host can now check you on the Record form." line (Decision 41). Ask whether to keep it for players arriving from the register QR code.
 - **Also open:** `openspec/changes/require-only-winner`, proposed but not yet designed.
 
 ## Setting up a new machine
@@ -87,7 +89,8 @@ Against an ordinary stage, sign-in can't complete from localhost: Google returns
   - The photo appears, including one taken on an iPhone.
   - Scanning the QR code registers and lands on `/me`, and the new Member appears when the timer's window is focused again.
   - The six timer buttons wrap sensibly on a narrow screen.
-- **Task 1.1, the frontend on `prod`,** on 2026-11-25 from `cc64bef`, bundle `assets/index-Di2953uR.js`. The bucket held only the placeholder `index.html` beforehand. `/`, `/leaderboard`, `/tournaments/new` and `/me` serve the new bundle, and `/api/leaderboard` answers 200.
+- **Task 1.1, the frontend on `prod`,** on 2026-11-25 from `cc64bef`, bundle `assets/index-Di2953uR.js`. The bucket held only the placeholder `index.html` beforehand. `/`, `/leaderboard`, `/tournaments/new` and `/me` serve the new bundle, and `/api/leaderboard` answers 200. Docs: PR #32.
+- **Task 2.1, slice 4 designed:** Decisions 42–45, the `member-profile` spec, and tasks 2.3–2.8. PR #33.
 
 ## Choices made while building slice 3, for review (task 4.2)
 
@@ -104,4 +107,4 @@ Against an ordinary stage, sign-in can't complete from localhost: Google returns
 - **Session 5 (2026-11-24):** opened slice 4 but skipped its first question, then built Decision 21 through slice 2.
 - **Session 6 (2026-11-25):** checked slice 2 on a personal stage and on `dev`, first deployed to `dev`, split slice 3 into seven PRs, built PR 1, and settled Decisions 36–39.
 - **Session 7 (2026-11-25):** set up a second machine, built slice 3 PRs 2–7, settled Decisions 40 and 41, deployed slice 3 to `dev` and checked it, made the backend change for Decision 36, and moved the remaining work into OpenSpec: this change and `require-only-winner`.
-- **Session 8 (2026-11-25):** deployed the frontend to `prod` (task 1.1), put task 1.2 on hold, and designed slice 4 (Decisions 42–45, task 2.1).
+- **Session 8 (2026-11-25):** deployed the frontend to `prod` (task 1.1), put task 1.2 on hold, and designed slice 4 (Decisions 42–45, task 2.1). Stopped before starting task 2.2.

@@ -148,13 +148,13 @@ Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds)
    1. **Merge or deploy backend PR `local-frontend-origin`** (backend commit `2ca0fea`, pushed but not merged on 2026-11-25). It adds `LOCAL_FRONTEND_ORIGIN`, documented in the backend `README.md` under "Serve a local frontend dev server from a personal stage". Merging also redeploys `dev` and `prod` with the same settings. Its integration tests run only in CI's PR gate, because Docker wasn't available locally.
    2. **Check the AWS credentials** with a read-only `aws sts get-caller-identity`. Done on 2026-11-25: they work for user `swille` in account `512808912517`.
    3. **Deploy the personal stage:** `LOCAL_FRONTEND_ORIGIN=http://localhost:3333 pnpm sst deploy --stage stephen` in the backend repo. It can run from that branch, before merging. The `stephen` stage's four SST secrets (`DatabaseUrl`, `GoogleClientId`, `GoogleClientSecret`, `SigninCookieKey`) were all confirmed set on 2026-11-25; see the backend's `handoff.md`. Deployed from commit `2ca0fea` on 2026-11-25; the stage's frontend bucket is `poker-timer-stephen-frontendbucket-ubscxsen` and its distribution is `E1D10KR82CPHON`.
-   4. **Run the frontend against it:** `API_ORIGIN=https://dtp80nyn4zjug.cloudfront.net pnpm dev`. Use the URL `sst deploy` prints if it differs.
-   5. **In Chrome or Firefox at http://localhost:3333, check that:**
-      - signing in shows your avatar
-      - Sign out ends both sessions and returns to localhost
-      - cancelling at Google shows "Sign-in was cancelled."
-      - Sign in and Sign out are disabled from Start until Reset
-2. **Deploy the frontend to `dev`** (see below) and check the same things there.
+   4. **Run the frontend against it:** `API_ORIGIN=https://dtp80nyn4zjug.cloudfront.net pnpm dev`. Use the URL `sst deploy` prints if it differs. A `pnpm dev` started without `API_ORIGIN` proxies to `dev`, so sign-in ends on `dev`'s placeholder page.
+   5. **In Chrome or Firefox at http://localhost:3333, checked on 2026-11-25:**
+      - Passed: signing in shows your avatar.
+      - Passed: Sign out ends both sessions and returns to localhost; the next Sign in goes to Google.
+      - Passed: Sign out is disabled while a game runs and is enabled again after Reset.
+      - Skipped: cancelling at Google shows "Sign-in was cancelled." Google shows Cancel only on its consent screen, which it skips once consent is given; use a private window or remove the app at https://myaccount.google.com/connections to see it.
+2. **Deploy the frontend to `dev`** (see below) and check the same things there, including the skipped cancel check.
 3. **Slice 3, recording a Tournament** (Decisions 23–30 and 34). It's designed; split it into one PR per task before starting. Two loose ends belong there:
    - Decision 35's register QR code returning to `/me`.
    - The backend only lets a Participant record.

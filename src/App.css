@@ -157,6 +157,25 @@ body {
     opacity: 0.6;
 }
 
+.signin-error {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background-color: #5c1f1f;
+    color: whitesmoke;
+    border: solid 2px #a33;
+    border-radius: 8px;
+    box-shadow: 3px 7px 11px 1px black;
+    font-size: 1.2rem;
+
+    button {
+        font-size: 1rem;
+        padding: 4px 12px;
+    }
+}
+
 button {
     padding: 8px 16px;
     background-color: darkgoldenrod;

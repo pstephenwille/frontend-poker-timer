@@ -26,11 +26,13 @@ const HANDS_STRONGEST_FIRST = [...HAND_CATEGORIES].reverse();
 const ACCEPTED_PHOTO_TYPES = ImageContentType.options.join(',');
 
 const withoutId = (ids: string[], idToRemove: string) => ids.filter((id) => id !== idToRemove);
+const withId = (ids: string[], idToAdd: string) => (ids.includes(idToAdd) ? ids : [...ids, idToAdd]);
 
-function MemberChoices({ legend, members, checkedIds, onToggle }: {
+function MemberChoices({ legend, members, checkedIds, lockedIds = [], onToggle }: {
   legend: string;
   members: MemberSummary[];
   checkedIds: string[];
+  lockedIds?: string[];
   onToggle: (memberId: string) => void;
 }) {
   return (
@@ -38,7 +40,12 @@ function MemberChoices({ legend, members, checkedIds, onToggle }: {
       <legend>{legend}</legend>
       {members.map((member) => (
         <label key={member.id}>
-          <input type="checkbox" checked={checkedIds.includes(member.id)} onChange={() => onToggle(member.id)} />
+          <input
+            type="checkbox"
+            checked={checkedIds.includes(member.id)}
+            disabled={lockedIds.includes(member.id)}
+            onChange={() => onToggle(member.id)}
+          />
           {member.displayName}
         </label>
       ))}
@@ -136,34 +143,32 @@ function RecordTournamentFields({ members, refreshFailed, onRefreshMembers }: {
   const areFieldsLocked = phase.status !== 'editing';
 
   const updateDraft = (changes: Partial<TournamentDraft>) => setDraft((current) => ({ ...current, ...changes }));
-  const checkedParticipants = members.filter((member) => draft.participantIds.includes(member.id));
-  const opponentCandidates = checkedParticipants.filter((member) => member.id !== draft.winnerId);
+  const opponentCandidates = members.filter((member) => member.id !== draft.winnerId);
+  const lockedParticipantIds = [draft.winnerId, ...draft.finalHandOpponentIds];
 
   const toggleParticipant = (memberId: string) => setDraft((current) => {
     const isUnchecking = current.participantIds.includes(memberId);
-    if (!isUnchecking) return { ...current, participantIds: [...current.participantIds, memberId] };
+    const participantIds = isUnchecking ? withoutId(current.participantIds, memberId) : [...current.participantIds, memberId];
 
-    return {
-      ...current,
-      participantIds: withoutId(current.participantIds, memberId),
-      winnerId: current.winnerId === memberId ? '' : current.winnerId,
-      finalHandOpponentIds: withoutId(current.finalHandOpponentIds, memberId),
-    };
+    return { ...current, participantIds };
   });
 
   const chooseWinner = (winnerId: string) => setDraft((current) => ({
     ...current,
     winnerId,
+    participantIds: winnerId ? withId(current.participantIds, winnerId) : current.participantIds,
     finalHandOpponentIds: withoutId(current.finalHandOpponentIds, winnerId),
   }));
 
   const toggleOpponent = (memberId: string) => setDraft((current) => {
-    const isUnchecking = current.finalHandOpponentIds.includes(memberId);
-    const finalHandOpponentIds = isUnchecking
-      ? withoutId(current.finalHandOpponentIds, memberId)
-      : [...current.finalHandOpponentIds, memberId];
+    const isUnmarking = current.finalHandOpponentIds.includes(memberId);
+    if (isUnmarking) return { ...current, finalHandOpponentIds: withoutId(current.finalHandOpponentIds, memberId) };
 
-    return { ...current, finalHandOpponentIds };
+    return {
+      ...current,
+      participantIds: withId(current.participantIds, memberId),
+      finalHandOpponentIds: [...current.finalHandOpponentIds, memberId],
+    };
   });
 
   const showLeaderboard = () => navigate(LEADERBOARD_PATH, { state: highlightNewWinner(draft.winnerId) });
@@ -208,6 +213,7 @@ function RecordTournamentFields({ members, refreshFailed, onRefreshMembers }: {
           legend="Participants"
           members={members}
           checkedIds={draft.participantIds}
+          lockedIds={lockedParticipantIds}
           onToggle={toggleParticipant}
         />
         <ParticipantListHelp refreshFailed={refreshFailed} onRefresh={onRefreshMembers} />
@@ -215,7 +221,7 @@ function RecordTournamentFields({ members, refreshFailed, onRefreshMembers }: {
           Winner
           <select value={draft.winnerId} onChange={(event) => chooseWinner(event.target.value)}>
             <option value="">Choose the Winner</option>
-            {checkedParticipants.map((member) => <option key={member.id} value={member.id}>{member.displayName}</option>)}
+            {members.map((member) => <option key={member.id} value={member.id}>{member.displayName}</option>)}
           </select>
         </label>
         <label>

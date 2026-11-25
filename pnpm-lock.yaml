@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@pstephenwille/poker-timer-contracts':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 1.1.0
+        version: 1.1.0
       '@tsparticles/confetti':
         specifier: ^4.6.0
         version: 4.6.0
@@ -420,8 +420,8 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
-  '@pstephenwille/poker-timer-contracts@1.0.0':
-    resolution: {integrity: sha512-wLHPvvNUb+3HhA+G8MiyQVn+fohxBVANfuQb44R3eQyQztHPH2UK6W2PUlZ9NA665z+0a2brLNnWkuoo5n/cqw==, tarball: https://npm.pkg.github.com/download/@pstephenwille/poker-timer-contracts/1.0.0/1aacbbe39d1e3e728137462298cfac01f7926f99}
+  '@pstephenwille/poker-timer-contracts@1.1.0':
+    resolution: {integrity: sha512-GGdT8TIqsKzVPIn5vqAtbjaNKIXpmGUvoFx9AmvqbKhtDGCwUOgTrULH5N0Ud/54w3qBLc0tNANH7x/u3neC4A==, tarball: https://npm.pkg.github.com/download/@pstephenwille/poker-timer-contracts/1.1.0/50449e2a9f07c1f2e993cfa685f6711dd6d7c547}
 
   '@rollup/rollup-android-arm-eabi@4.34.9':
     resolution: {integrity: sha512-qZdlImWXur0CFakn2BJ2znJOdqYZKiedEPEVNTBrpfPjc/YuTGcaYZcdmNFTkUj3DU0ZM/AElcM8Ybww3xVLzA==}
@@ -1916,7 +1916,7 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
 
-  '@pstephenwille/poker-timer-contracts@1.0.0':
+  '@pstephenwille/poker-timer-contracts@1.1.0':
     dependencies:
       zod: 4.6.7
 

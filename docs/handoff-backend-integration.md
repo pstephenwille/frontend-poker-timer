@@ -1,6 +1,6 @@
 # Handoff: building the frontend on the backend
 
-Status as of 2026-11-25, after session 7. Slices 1 and 2 are merged, deployed to `dev` and checked against the real backend. Slice 3 is merged and deployed to `dev`, but not yet checked against the real backend; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
+Status as of 2026-11-25, after session 7. Slices 1 and 2 are merged, deployed to `dev` and checked against the real backend. Slice 3 is merged, deployed to `dev` and checked there, and the backend lets any Member record; next is the `prod` deploy and backend task 14.3; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
 
 To reopen the design, run `/mattpocock-skills:grill-with-docs` and point it at this file. Ask questions **one at a time**, each with a recommended answer, and record each answer here and in `GLOSSARY.md` as soon as it is given. The backend repo (`../backend-poker-timer`) is read only for facts; this repo is where the design lives.
 
@@ -129,7 +129,7 @@ Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds)
 
 Session 6 (2026-11-25) checked slice 2 against a personal stage and then `dev`, deployed the frontend to `dev`, split slice 3 into seven PRs, opened its first one, and settled Decisions 36–39 while preparing PR 2.
 
-Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7 and settled Decisions 40 and 41 for PR 7.
+Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7, settled Decisions 40 and 41 for PR 7, deployed slice 3 to `dev` and checked it there, and made the backend change for Decision 36.
 
 ### Done
 
@@ -168,6 +168,12 @@ Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7 and sett
   - PR 6, End Tournament: #27.
   - PR 7, registering at the table, with the placeholder `/me`: #28.
 - **Decisions 40 and 41** (session 7): the QR code is drawn with `qrcode.react`; `/me` is a placeholder until slice 4.
+- **Backend PR #23 (`any-member-can-record`, Decision 36)** merged as `6ccec59`, with openspec task 17.1. Its Deliver run deployed `dev` and `prod` on 2026-11-25. No contracts release was needed.
+- **Slice 3 checked on `dev`** (session 7, 2026-11-25), from `7b6882f` against backend `6ccec59`. All passed:
+  - End Tournament, then recording with a photo, lands on the Leaderboard with the Winner highlighted.
+  - The photo appears on the Tournament, including one taken on an iPhone.
+  - Scanning the QR code with a phone registers and lands on `/me`, and the new Member appears on the form when the timer's window is focused again.
+  - The six timer buttons wrap sensibly on a narrow screen.
 
 ### Choices made while building slice 3, for review
 
@@ -180,14 +186,18 @@ Session 7 (2026-11-25) set up a second machine, built slice 3 PRs 2–7 and sett
 
 ### Next
 
-1. **Check slice 3 on `dev`,** where it was deployed on 2026-11-25 from `7b6882f`. Recording writes a real Tournament to `dev`'s Leaderboard. Photo uploads can't be checked from `pnpm dev`, because the media bucket's CORS allows only the stage's own origin. Check:
-   - End Tournament, then recording with a photo, lands on the Leaderboard with the Winner highlighted.
-   - The photo appears on the Tournament, including one taken on an iPhone (some browsers give `.heic` files no type, which the form would refuse).
-   - Scanning the QR code with a phone registers and lands on `/me`, and the new Member appears on the form when the timer's window is focused again.
-   - The six timer buttons wrap sensibly on a narrow screen.
-2. **The backend change for Decision 36,** a backend PR that can go in any time. Until it ships, a recorder who isn't a Participant sees "You can only record a tournament you played in", so check yourself as a Participant when recording on `dev`.
-3. **Then deploy to `prod` and run backend task 14.3** through the real UI.
-4. **Slice 4 (profile and avatar) and the admin UI** still need designing. Slice 4 replaces the placeholder `/me`, and adds Me to the account menu (Decision 33).
+1. **Deploy the frontend to `prod` and run backend task 14.3** through the real UI (see **Deploying the frontend by hand**).
+2. **Slice 4 (profile and avatar) and the admin UI** still need designing. Slice 4 replaces the placeholder `/me`, and adds Me to the account menu (Decision 33).
+
+### Future work
+
+- **Only the Winner should be required when recording** (noted in session 7, 2026-11-25; not yet designed). Today a Tournament needs at least two Participants with the Winner among them. Recording should need only the Winner; other Participants stay optional. This reopens Decision 37, which kept the two-Participant minimum because the backend requires it and the Leaderboard's Played and Win rate count Participants. Designing it needs answers to:
+  - Is the Winner then always counted as a Participant, so Played and Win rate stay meaningful?
+  - What happens to Played and Win rate for players who aren't checked?
+
+  It touches the backend and the frontend:
+  - **Backend:** `MIN_PARTICIPANTS` and the winner ∈ participants rule in the contracts (`packages/contracts/src/tournament.ts`), the `tournament-records` spec and its tests, and a contracts release.
+  - **Frontend:** the "Check at least two Participants." rule in `src/tournaments/tournament-draft.ts`, and the Winner choices, which today come only from the checked Participants.
 
 ### Running the frontend against a personal stage
 

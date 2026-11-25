@@ -1,6 +1,6 @@
 # Handoff: building the frontend on the backend
 
-Status as of 2026-11-24, after session 5. Slices 1 and 2 are built and merged, but not yet deployed or tried against the real backend; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
+Status as of 2026-11-25, after session 6. Slices 1 and 2 are merged, deployed to `dev` and checked against the real backend. Slice 3 is planned and its first PR is open; see **Status** at the end for where to pick up. Decisions are recorded here. Terms that are settled are in `GLOSSARY.md`.
 
 To reopen the design, run `/mattpocock-skills:grill-with-docs` and point it at this file. Ask questions **one at a time**, each with a recommended answer, and record each answer here and in `GLOSSARY.md` as soon as it is given. The backend repo (`../backend-poker-timer`) is read only for facts; this repo is where the design lives.
 
@@ -125,6 +125,8 @@ Session 4 (2026-11-24) designed slices 2 and 3, sign-in and recording a Tourname
 
 Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds) was skipped, so slice 4 is still undesigned. It then implemented Decision 21 through slice 2.
 
+Session 6 (2026-11-25) checked slice 2 against a personal stage and then `dev`, deployed the frontend to `dev`, split slice 3 into seven PRs, opened its first one, and settled Decisions 36–39 while preparing PR 2.
+
 ### Done
 
 - **Step 1 (frontend refactor):** Round → Level, `setStartingBlind`, the Color-up Break after the 15 blind, and "Take Break" disabled until Start. Merged as PR #5.
@@ -145,28 +147,40 @@ Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds)
   - Full sign-out through Cognito.
   - Both are disabled from Start until Reset.
   - The sign-in error banner (Decision 35).
+- **Slice 2 checked against the real backend** (session 6, 2026-11-25), from `pnpm dev` on the `stephen` personal stage and then on `dev`:
+  - Passed: signing in shows your avatar.
+  - Passed: Sign out ends both sessions and returns to the same site; the next Sign in goes to Google.
+  - Passed: Sign out is disabled while a game runs and is enabled again after Reset.
+  - Skipped both times: cancelling at Google shows "Sign-in was cancelled." It's still unchecked anywhere. Google shows Cancel only on its consent screen, which it skips once consent is given; use a private window or remove the app at https://myaccount.google.com/connections to see it.
+- **Backend PR #22 (`local-frontend-origin`)** merged as `69c7cb4`, and its Deliver run redeployed `dev` and `prod`.
+- **The frontend is on `dev`** from master at `526b16f` (see **Deploying the frontend by hand**).
+- **Decisions 36–39** (session 6): any Member can record; the Winner is what matters and Participants are bookkeeping; Participants start unchecked; the Pot starts empty.
+
+### Open PRs, as of the end of session 6
+
+- **Frontend PR #20 (`docs/slice-3-split`):** the slice 3 plan, Decisions 36–39 and this status. Docs only.
+- **Frontend PR #21 (`feat/record-tournament-page`):** slice 3 PR 1, from `master`. Beyond the plan, it makes these choices for review:
+  - "Sign in to record" is disabled from Start until Reset, like the header's Sign in (Decision 32), because sign-in reloads the page.
+  - If the account check fails, the page says "Couldn't check whether you're signed in. Reload the page to try again."
+  - The header links to every page except the current one, so the timer shows Leaderboard and Record.
+  - The `/api/me` check moved into `CurrentMemberProvider` (`src/members/current-member-provider.tsx`), shared by the header and the page; `SignInLink` (`src/members/sign-in-link.tsx`) is shared by both Sign in links; page paths live in `src/app-paths.ts`.
 
 ### Next
 
-1. **Try slice 2 against the real backend, signing in from `pnpm dev`.** Against an ordinary stage, sign-in can't complete from localhost: Google returns to the stage's own address, and the backend refuses a `POST` whose `Origin` is localhost. So the chosen route is a personal stage that serves localhost:
-   1. **Merge backend PR #22 (`local-frontend-origin`).** Done on 2026-11-25 as `69c7cb4`, and its Deliver run redeployed `dev` and `prod`. It adds `LOCAL_FRONTEND_ORIGIN`, documented in the backend `README.md` under "Serve a local frontend dev server from a personal stage".
-   2. **Check the AWS credentials** with a read-only `aws sts get-caller-identity`. Done on 2026-11-25: they work for user `swille` in account `512808912517`.
-   3. **Deploy the personal stage:** `LOCAL_FRONTEND_ORIGIN=http://localhost:3333 pnpm sst deploy --stage stephen` in the backend repo. The `stephen` stage's four SST secrets (`DatabaseUrl`, `GoogleClientId`, `GoogleClientSecret`, `SigninCookieKey`) were all confirmed set on 2026-11-25; see the backend's `handoff.md`. Deployed from commit `2ca0fea` on 2026-11-25; the stage's frontend bucket is `poker-timer-stephen-frontendbucket-ubscxsen` and its distribution is `E1D10KR82CPHON`.
-   4. **Run the frontend against it:** `API_ORIGIN=https://dtp80nyn4zjug.cloudfront.net pnpm dev`. Use the URL `sst deploy` prints if it differs. A `pnpm dev` started without `API_ORIGIN` proxies to `dev`, so sign-in ends on `dev`'s placeholder page.
-   5. **In Chrome or Firefox at http://localhost:3333, checked on 2026-11-25:**
-      - Passed: signing in shows your avatar.
-      - Passed: Sign out ends both sessions and returns to localhost; the next Sign in goes to Google.
-      - Passed: Sign out is disabled while a game runs and is enabled again after Reset.
-      - Skipped: cancelling at Google shows "Sign-in was cancelled." Google shows Cancel only on its consent screen, which it skips once consent is given; use a private window or remove the app at https://myaccount.google.com/connections to see it.
-2. **Deploy the frontend to `dev`** (see below) and check the same things there. Done on 2026-11-25 at https://d3qe36cyda6430.cloudfront.net:
-   - Passed: signing in shows your avatar.
-   - Passed: Sign out ends both sessions and returns to `dev`; the next Sign in goes to Google.
-   - Passed: Sign out is disabled while a game runs and is enabled again after Reset.
-   - Skipped again: cancelling at Google. It's still unchecked anywhere.
-3. **Slice 3, recording a Tournament** (Decisions 23–30, 34 and 35's `/me` return). Split on 2026-11-25 into the PRs under **Slice 3 plan** below, built in that order. Decision 36 settled who can record. Its backend change is a separate backend PR; until it ships, a recorder who isn't a Participant sees the backend's refusal through PR 2's error message. Still undecided:
-   - Which QR code library to use. PR 7.
-4. **Then deploy to `prod` and run backend task 14.3** through the real UI.
-5. **Slice 4 (profile and avatar) and the admin UI** still need designing.
+1. **Review and merge PRs #20 and #21.**
+2. **Slice 3 PR 2, recording with the required fields,** from the latest `master` once #21 is merged. Its design is settled (see **Slice 3 plan**).
+3. **The backend change for Decision 36,** a backend PR that can go in any time. Until it ships, a recorder who isn't a Participant sees the backend's `recorder_not_participant` refusal through PR 2's error message.
+4. **Slice 3 PRs 3–7, in order.** Still undecided: which QR code library to use, for PR 7.
+5. **Then deploy to `prod` and run backend task 14.3** through the real UI.
+6. **Slice 4 (profile and avatar) and the admin UI** still need designing.
+
+### Running the frontend against a personal stage
+
+Against an ordinary stage, sign-in can't complete from localhost: Google returns to the stage's own address, and the backend refuses a `POST` whose `Origin` is localhost. A personal stage deployed with `LOCAL_FRONTEND_ORIGIN` serves localhost instead (backend `README.md`, "Serve a local frontend dev server from a personal stage").
+
+1. **Check the AWS credentials** with a read-only `aws sts get-caller-identity`. It should show user `swille` in account `512808912517`.
+2. **Deploy the personal stage:** `LOCAL_FRONTEND_ORIGIN=http://localhost:3333 pnpm sst deploy --stage stephen` in the backend repo. The `stephen` stage's four SST secrets (`DatabaseUrl`, `GoogleClientId`, `GoogleClientSecret`, `SigninCookieKey`) are set; `pnpm sst secret list --stage stephen` lists them, but prints their values. It was last deployed on 2026-11-25 from `2ca0fea`; its frontend bucket is `poker-timer-stephen-frontendbucket-ubscxsen` and its distribution is `E1D10KR82CPHON`.
+3. **Run the frontend against it:** `API_ORIGIN=https://dtp80nyn4zjug.cloudfront.net pnpm dev`. Use the URL `sst deploy` prints if it differs. A `pnpm dev` started without `API_ORIGIN` proxies to `dev`, so sign-in ends on `dev`'s placeholder page.
 
 ### Slice 3 plan
 
@@ -217,7 +231,7 @@ The `dev` stage is https://d3qe36cyda6430.cloudfront.net, and `prod` is https://
 3. Run `aws s3 sync dist/ s3://<frontendBucket>/ --delete`. That replaces the placeholder `index.html`.
 4. Run `aws cloudfront create-invalidation --distribution-id <distributionId> --paths "/*"`.
 
-Credentials for AWS account `512808912517` are needed in the environment, exported before the editor or Claude Code starts. This needs AWS CLI v2. The current machine has v2.42.3, and the credentials added on 2026-11-25 work.
+Credentials for AWS account `512808912517` are needed in the environment, exported before the editor or Claude Code starts. This needs AWS CLI v2.
 
 The SST Router's CloudFront origin is `placeholder.sst.dev`, not the bucket, so find the bucket by name with `aws s3api list-buckets` instead. For `dev`, the bucket is `poker-timer-dev-frontendbucket-htazhobe` and the distribution is `E1J1N6X6GCOF47`.
 
@@ -230,12 +244,16 @@ On 2026-11-25 the frontend was deployed to `dev` from master at `526b16f`. Nothi
   - Create a classic personal access token with only `read:packages`, and export it as `GITHUB_TOKEN` before starting the editor or Claude Code.
   - Add `//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}` to `~/.npmrc`. pnpm ignores tokens from environment variables in a project `.npmrc`, which names only the registry.
 - **`pnpm dev`** serves on port 3333 and proxies `/api` to `dev`, or to `API_ORIGIN` when it's set.
-- **The `gh` CLI wasn't installed** in session 5, so PRs were opened by hand from the pushed branches.
+- **AWS CLI v2,** with the credentials above, for deploys and the personal stage.
+- **The `gh` CLI.** Without sudo, install the release binary into `~/.local/bin` after checking it against the release's checksums file. `gh` prefers `GITHUB_TOKEN` over its own login, and that token only reads packages, so sign in with `env -u GITHUB_TOKEN gh auth login` and run every `gh` command as `env -u GITHUB_TOKEN gh …`.
+- **Both repos side by side:** this one and `../backend-poker-timer`, each on an up-to-date `master`.
 
 ### How the work is run
 
 - **One branch and PR per task.** Each starts from `master` once the previous PR is merged.
+- **Sync before starting and before every push.** Fetch, and check the branch's PR with `gh pr view`. PRs here are often merged within minutes, and GitHub then deletes the branch; never push to a merged PR's branch, start a new one from the latest `master` instead. Check PR and deploy state on GitHub rather than trusting this file.
 - **One step at a time.** Stop after each step for review.
 - **Diffable edits.** Make file changes with diffable edits, not shell rewrites.
 - **Test-first,** with tests at agreed seams. So far that's the whole app rendered with `fetch` answered by `src/testing/fake-backend.ts`, plus pure functions like `pickHonors`.
-- **US spelling** (honors, color).
+- **US spelling and wording** (honors, color, checked rather than ticked).
+- **Design questions one at a time,** each with a recommended answer, and only where the code or decisions leave it unclear. Record each answer here as soon as it's given.

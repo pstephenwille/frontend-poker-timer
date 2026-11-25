@@ -85,12 +85,12 @@ describe('leaving the timer', () => {
   });
 
   test('coming back to the timer fetches the Leaderboard again for the honor cards', async () => {
-    const fetchStub = serveLeaderboard([leaderboardEntry('Ann')]);
+    serveLeaderboard([leaderboardEntry('Ann')]);
     const user = userEvent.setup();
     renderApp();
     expect(within(await championCard()).getByText('No winner yet')).toBeInTheDocument();
 
-    fetchStub.mockImplementation(async () => Response.json([ann]));
+    serveLeaderboard([ann]);
     await user.click(screen.getByRole('link', { name: 'Leaderboard' }));
     await user.click(screen.getByRole('link', { name: 'Timer' }));
 

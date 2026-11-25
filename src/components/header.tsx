@@ -3,6 +3,7 @@ import { BreakTimer } from './break-timer';
 import { LevelSettings } from './level-settings';
 import { TimerExitLink } from './timer-exit-link';
 import { useGameEngine } from '../game-engine';
+import { AccountArea } from '../members/account-area';
 
 function TimerControls() {
   const engine = useGameEngine();
@@ -35,6 +36,7 @@ export function Header({ isTimerShown }: { isTimerShown: boolean }) {
           {isTimerShown
             ? <TimerExitLink to="/leaderboard">Leaderboard</TimerExitLink>
             : <Link to="/">Timer</Link>}
+          <AccountArea />
         </nav>
       </div>
 

@@ -1,7 +1,8 @@
 import { screen, within } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 import { leaderboardEntry } from '../testing/leaderboard-entries';
-import { failLeaderboard, renderApp, serveLeaderboard } from '../testing/render-app';
+import { failLeaderboard, serveLeaderboard } from '../testing/fake-backend';
+import { renderApp } from '../testing/render-app';
 
 const rowTexts = (row: HTMLElement) =>
   within(row).getAllByRole('cell').map((cell) => cell.textContent);

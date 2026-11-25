@@ -2,7 +2,8 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test } from 'vitest';
 import { leaderboardEntry } from './testing/leaderboard-entries';
-import { renderApp, serveLeaderboard } from './testing/render-app';
+import { serveLeaderboard } from './testing/fake-backend';
+import { renderApp } from './testing/render-app';
 
 const LEAVING_LOCKED_HINT = 'Pause the game to leave the timer';
 const ONE_SECOND_INTO_THE_LEVEL = '09:59';

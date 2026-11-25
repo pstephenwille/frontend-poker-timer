@@ -25,6 +25,15 @@ describe('the Leaderboard page', () => {
     expect(rowTexts(calRow)).toEqual(['2', 'Cal', '0', '0', '—', '$0', '—']);
   });
 
+  test('says that Played counts only the Tournaments a Member was checked in', async () => {
+    serveLeaderboard([leaderboardEntry('Ann')]);
+
+    renderApp('/leaderboard');
+
+    await screen.findByRole('table', { name: 'Leaderboard' });
+    expect(screen.getByText('Played counts the Tournaments a Member was checked in as a Participant.')).toBeInTheDocument();
+  });
+
   test('says so when the Leaderboard cannot be fetched', async () => {
     failLeaderboard();
     vi.spyOn(console, 'error').mockImplementation(() => {});

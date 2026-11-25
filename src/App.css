@@ -463,8 +463,12 @@ button:hover {
     }
 }
 
-.leaderboard, .leaderboard-status {
+.leaderboard-panel, .leaderboard-status {
     margin: 2rem auto auto;
+}
+
+.leaderboard-panel {
+    width: min(100% - 2rem, 70rem);
 }
 
 .leaderboard-status {
@@ -472,8 +476,14 @@ button:hover {
     font-size: 1.5rem;
 }
 
+.leaderboard-note {
+    margin: 0.75rem 0 0;
+    color: whitesmoke;
+    font-size: 0.9rem;
+}
+
 .leaderboard {
-    width: min(100% - 2rem, 70rem);
+    width: 100%;
     border-collapse: collapse;
     background-color: var(--card-bg);
     color: var(--blinds-color);
@@ -565,6 +575,10 @@ button:hover {
 
 /** On a phone, the Leaderboard keeps rank, Member, wins and winnings; the other columns would force sideways scrolling. */
 @media (max-width: 600px) {
+    .leaderboard-note {
+        display: none;
+    }
+
     .leaderboard {
         font-size: 1rem;
 

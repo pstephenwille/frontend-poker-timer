@@ -159,11 +159,51 @@ Session 5 (2026-11-24) opened slice 4, but its first question (what `/me` holds)
    - Passed: Sign out ends both sessions and returns to `dev`; the next Sign in goes to Google.
    - Passed: Sign out is disabled while a game runs and is enabled again after Reset.
    - Skipped again: cancelling at Google. It's still unchecked anywhere.
-3. **Slice 3, recording a Tournament** (Decisions 23–30 and 34). It's designed; split it into one PR per task before starting. Two loose ends belong there:
-   - Decision 35's register QR code returning to `/me`.
-   - The backend only lets a Participant record.
+3. **Slice 3, recording a Tournament** (Decisions 23–30, 34 and 35's `/me` return). Split on 2026-11-25 into the PRs under **Slice 3 plan** below, built in that order. Two loose ends are still undecided, each to be asked before the PR that needs it:
+   - What the form does when the signed-in Member isn't a ticked Participant (the backend refuses with `recorder_not_participant`). PR 2.
+   - Which QR code library to use. PR 7.
 4. **Then deploy to `prod` and run backend task 14.3** through the real UI.
 5. **Slice 4 (profile and avatar) and the admin UI** still need designing.
+
+### Slice 3 plan
+
+One PR per row, each on its own branch from the latest `master`, built in order. Every test renders the app through `src/testing/render-app.tsx` against `src/testing/fake-backend.ts` and checks what a person sees and does. Each PR passes `pnpm test`, `pnpm lint` and `pnpm build` before it goes up.
+
+1. **The `/tournaments/new` page and its header link** (Decisions 23 and 25).
+   - Signed out, the page shows "Sign in to record", linking to `/api/auth/login` with `returnTo` set to the page's URL, including `?playedOn`.
+   - Signed in, it shows the form and not the prompt.
+   - The header's "Record" link opens the page from Not Started and Paused, and is disabled while Running or On Break (Decision 31).
+2. **Recording with the required fields** (Decisions 24, 26, 27 and 30). Participants come from `GET /api/members` and the previous Tournament from `GET /api/tournaments`; Save calls `POST /api/tournaments`.
+   - Only active Members are listed, and the previous Tournament's Participants are ticked.
+   - The Winner choices are only the ticked Participants, and unticking the chosen Winner clears it.
+   - The Pot starts at the previous Tournament's Pot. With no previous Tournament, it's empty.
+   - Played on comes from `?playedOn` in local time, or now when there's none. A future time shows "Played on can't be in the future" and doesn't save.
+   - Save is blocked with fewer than two Participants or no Winner.
+   - A valid save sends the expected `CreateTournament` body and lands on `/leaderboard`.
+   - A backend error keeps the form filled and shows the message.
+3. **Final Hand Opponents and Note** (Decision 27).
+   - The opponent choices are the Participants other than the Winner. Changing the Winner removes them from the opponents.
+   - The Note stops at 500 characters.
+   - Both are left out of the request body or sent empty when unused, and sent as entered when used.
+4. **After a save** (Decision 28).
+   - `/leaderboard` highlights the new Winner's row, and only right after a save.
+   - Going back to the timer fetches the Leaderboard again, so both cards show the new Tournament.
+   - Moving between pages without saving also fetches it again each time the timer screen is shown.
+5. **The photo** (Decisions 27 and 29). The upload is `POST /api/tournaments/:id/photo/uploads` for a grant, a multipart post of the grant's fields and the file to its URL, then `POST /api/tournaments/:id/photo` with the `mediaId`.
+   - Save creates the Tournament, then requests the grant, posts the file and confirms the upload, in that order.
+   - A failed upload shows "Tournament recorded. The photo didn't upload.", locks the other fields and never sends a second `POST /api/tournaments`.
+   - Try again reuses the same file and Tournament, and goes on to `/leaderboard` once it succeeds.
+   - Skip photo goes to `/leaderboard`.
+   - Saving without a photo makes no upload calls.
+6. **End Tournament on the timer** (Decision 23).
+   - It's disabled at Not Started and enabled while Running or Paused.
+   - Cancelling the confirmation leaves the clock and settings as they were.
+   - Confirming Resets the timer to Not Started and opens `/tournaments/new?playedOn=<ms>` at the moment the Tournament ended, using a fake clock.
+   - Leaving the form afterwards doesn't touch the timer.
+7. **Registering at the table** (Decisions 34 and 35).
+   - The QR code shows on the form and on the signed-out prompt, and encodes the sign-in URL that returns to `/me`.
+   - Focusing the window again, or pressing Refresh, adds a newly registered Member and keeps the boxes already ticked and the fields already filled.
+   - The note says players without an account can't be recorded.
 
 ### Deploying the frontend by hand
 

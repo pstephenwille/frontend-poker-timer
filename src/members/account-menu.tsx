@@ -1,6 +1,7 @@
 import type { Me } from '@pstephenwille/poker-timer-contracts';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { leaveApp } from '../browser/leave-app';
+import { SiteNavLinks } from '../components/site-nav-links';
 import { useGameEngine } from '../game-engine';
 import { MemberAvatar } from '../leaderboard/member-avatar';
 import { endSession } from './sign-out-api';
@@ -31,9 +32,31 @@ function SignOutButton() {
  */
 export function AccountMenu({ me }: { me: Me }) {
   const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const closeMenu = () => setIsOpen(false);
+
+  useEffect(function closeOnOutsideClickOrEscape() {
+    if (!isOpen) return;
+
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      const isInsideMenu = event.target instanceof Node && menuRef.current?.contains(event.target);
+      if (!isInsideMenu) setIsOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.code === 'Escape') setIsOpen(false);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isOpen]);
 
   return (
-    <div className="account-menu">
+    <div className="account-menu" ref={menuRef}>
       <button
         className="signed-in-member"
         aria-label={`Signed in as ${me.displayName}`}
@@ -44,6 +67,10 @@ export function AccountMenu({ me }: { me: Me }) {
       </button>
       {isOpen && (
         <div className="account-menu-items">
+          <nav className="site-nav" onClick={closeMenu}>
+            <SiteNavLinks />
+          </nav>
+          <hr />
           <SignOutButton />
         </div>
       )}

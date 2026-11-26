@@ -2,6 +2,7 @@ import { me as ann, members } from '@pstephenwille/poker-timer-contracts/fixture
 import { screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { openAccountMenu } from '../testing/account-menu';
 import { acceptTournaments, serveLeaderboard, serveMembers, signIn } from '../testing/fake-backend';
 import { fillInEveryRequiredField, leaderboardShown, save, tournamentsPosted } from '../testing/record-tournament-form';
 import { renderApp } from '../testing/render-app';
@@ -42,6 +43,8 @@ describe('End Tournament', () => {
 
   test('Resets the timer and opens the Record page without asking first', async () => {
     const confirm = vi.spyOn(window, 'confirm');
+    signIn(ann);
+    serveMembers(members);
     const user = openTheTimer();
     await startTheTournament(user);
     await pauseTheTournament(user);
@@ -50,6 +53,7 @@ describe('End Tournament', () => {
 
     expect(await screen.findByRole('heading', { name: 'Record a Tournament' })).toBeInTheDocument();
     expect(confirm).not.toHaveBeenCalled();
+    await openAccountMenu(user);
     await user.click(screen.getByRole('link', { name: 'Timer' }));
     expect(screen.getByRole('button', { name: 'Start' })).toBeInTheDocument();
     expect(endTournamentButton()).toBeDisabled();

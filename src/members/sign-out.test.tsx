@@ -4,16 +4,13 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
 import { leaveApp } from '../browser/leave-app';
 import { failSignOut, requestsTo, serveSignOut, signIn } from '../testing/fake-backend';
+import { openAccountMenu } from '../testing/account-menu';
 import { renderApp } from '../testing/render-app';
 
 vi.mock('../browser/leave-app');
 
 const COGNITO_SIGN_OUT_URL = 'https://auth.example.test/logout?client_id=example';
 const SIGN_OUT_LOCKED_HINT = 'Sign out after the game';
-
-async function openAccountMenu(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(await screen.findByRole('button', { name: 'Signed in as Ann.AllIn' }));
-}
 
 describe('signing out', () => {
   test('ends the session, then signs out of Cognito too', async () => {
@@ -33,16 +30,17 @@ describe('signing out', () => {
     signIn(ann);
     const user = userEvent.setup();
     renderApp();
-    await openAccountMenu(user);
 
     await user.click(screen.getByRole('button', { name: 'Start' }));
     await user.click(screen.getByRole('button', { name: 'Pause' }));
+    await openAccountMenu(user);
 
     const signOut = screen.getByRole('button', { name: 'Sign out' });
     expect(signOut).toBeDisabled();
     expect(signOut).toHaveAttribute('title', SIGN_OUT_LOCKED_HINT);
 
     await user.click(screen.getByRole('button', { name: 'Reset' }));
+    await openAccountMenu(user);
 
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled();
   });

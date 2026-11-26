@@ -11,6 +11,7 @@ import {
   serveMembers,
   signIn,
 } from '../testing/fake-backend';
+import { openAccountMenu } from '../testing/account-menu';
 import { leaderboardEntry } from '../testing/leaderboard-entries';
 import {
   annMember,
@@ -347,7 +348,10 @@ describe('after a save', () => {
   test('the highlight is gone when the Leaderboard is opened again', async () => {
     const user = await recordBobsWin();
 
+    await openAccountMenu(user);
+
     await user.click(screen.getByRole('link', { name: 'Timer' }));
+    await openAccountMenu(user);
     await user.click(screen.getByRole('link', { name: 'Leaderboard' }));
 
     await screen.findByRole('table', { name: 'Leaderboard' });
@@ -356,6 +360,8 @@ describe('after a save', () => {
 
   test('going back to the timer shows the new Tournament on both honor cards', async () => {
     const user = await recordBobsWin();
+
+    await openAccountMenu(user);
 
     await user.click(screen.getByRole('link', { name: 'Timer' }));
 

@@ -10,6 +10,7 @@ import { CurrentMemberProvider } from './members/current-member-provider';
 import { MePage } from './members/me-page';
 import { RecordTournamentPage } from './tournaments/record-tournament-page';
 import { LEADERBOARD_PATH, ME_PATH, RECORD_TOURNAMENT_PATH, TIMER_PATH } from './app-paths';
+import { TimerFooter } from './components/timer-footer';
 
 const isTypingInFormField = (target: EventTarget | null) =>
   target instanceof HTMLInputElement
@@ -65,14 +66,17 @@ export function App() {
     <CurrentMemberProvider>
       <div className="app">
         <Header isTimerShown={isTimerShown} />
-        <SigninErrorBanner />
-        <TimerScreen isShown={isTimerShown} />
-        <Routes>
-          <Route path={TIMER_PATH} element={null} />
-          <Route path={LEADERBOARD_PATH} element={<LeaderboardPage />} />
-          <Route path={RECORD_TOURNAMENT_PATH} element={<RecordTournamentPage />} />
-          <Route path={ME_PATH} element={<MePage />} />
-        </Routes>
+        <main className="app-main">
+          <SigninErrorBanner />
+          <TimerScreen isShown={isTimerShown} />
+          <Routes>
+            <Route path={TIMER_PATH} element={null} />
+            <Route path={LEADERBOARD_PATH} element={<LeaderboardPage />} />
+            <Route path={RECORD_TOURNAMENT_PATH} element={<RecordTournamentPage />} />
+            <Route path={ME_PATH} element={<MePage />} />
+          </Routes>
+        </main>
+        {isTimerShown && <TimerFooter />}
       </div>
     </CurrentMemberProvider>
   )

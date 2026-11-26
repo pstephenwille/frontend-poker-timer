@@ -3,6 +3,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
 import { failMe, serveLeaderboard, signIn } from '../testing/fake-backend';
+import { openAccountMenu } from '../testing/account-menu';
 import { renderApp } from '../testing/render-app';
 
 const SIGN_IN_LOCKED_HINT = 'Sign in after the game';
@@ -51,5 +52,52 @@ describe('the header account area', () => {
     await vi.waitFor(() => expect(consoleError).toHaveBeenCalledWith(ACCOUNT_CHECK_FAILED, expect.any(Error)));
     expect(screen.queryByText('Sign in')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Signed in as/ })).not.toBeInTheDocument();
+  });
+});
+
+describe('the account menu', () => {
+  test('signed out, the header offers no page links', async () => {
+    serveLeaderboard([]);
+    renderApp();
+    await screen.findByRole('link', { name: 'Sign in' });
+
+    expect(screen.queryByRole('link', { name: 'Leaderboard' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Record' })).not.toBeInTheDocument();
+  });
+
+  test('closes after picking a page', async () => {
+    signIn(ann);
+    serveLeaderboard([]);
+    const user = userEvent.setup();
+    renderApp();
+    await openAccountMenu(user);
+
+    await user.click(screen.getByRole('link', { name: 'Leaderboard' }));
+
+    expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument();
+  });
+
+  test('closes on a click outside it', async () => {
+    signIn(ann);
+    serveLeaderboard([]);
+    const user = userEvent.setup();
+    renderApp();
+    await openAccountMenu(user);
+
+    await user.click(document.body);
+
+    expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument();
+  });
+
+  test('closes on Escape', async () => {
+    signIn(ann);
+    serveLeaderboard([]);
+    const user = userEvent.setup();
+    renderApp();
+    await openAccountMenu(user);
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument();
   });
 });

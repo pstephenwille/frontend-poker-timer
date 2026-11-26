@@ -20,9 +20,9 @@ function MeContent() {
 /** A placeholder where the register QR code lands, until the profile page is designed (slice 4). */
 export function MePage() {
   return (
-    <main className="me-page">
+    <section className="me-page">
       <h1>Me</h1>
       <MeContent />
-    </main>
+    </section>
   );
 }

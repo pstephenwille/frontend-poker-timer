@@ -3,10 +3,10 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { failMe, serveLeaderboard, serveMembers, signIn } from '../testing/fake-backend';
+import { openAccountMenu } from '../testing/account-menu';
 import { renderApp } from '../testing/render-app';
 
 const LEAVING_LOCKED_HINT = 'Pause the game to leave the timer';
-const SIGN_IN_LOCKED_HINT = 'Sign in after the game';
 const PLAYED_ON = Date.UTC(2026, 10, 24, 4, 30);
 
 const recordForm = () => screen.findByRole('form', { name: 'Record a Tournament' });
@@ -33,19 +33,6 @@ describe('the Record a Tournament page', () => {
     expect(screen.queryByText('Sign in to record')).not.toBeInTheDocument();
   });
 
-  test('Sign in to record is disabled while a Tournament is Paused, because it reloads the page', async () => {
-    serveLeaderboard([]);
-    const user = userEvent.setup();
-    renderApp();
-
-    await user.click(screen.getByRole('button', { name: 'Start' }));
-    await user.click(screen.getByRole('button', { name: 'Pause' }));
-    await user.click(screen.getByRole('link', { name: 'Record' }));
-
-    expect(await screen.findByText('Sign in to record')).toHaveAttribute('title', SIGN_IN_LOCKED_HINT);
-    expect(screen.queryByRole('link', { name: 'Sign in to record' })).not.toBeInTheDocument();
-  });
-
   test('says so when the account cannot be checked', async () => {
     failMe();
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -56,12 +43,17 @@ describe('the Record a Tournament page', () => {
   });
 });
 
-describe('the header Record link', () => {
-  test('opens the page from Not Started', async () => {
+describe('the account menu Record link', () => {
+  beforeEach(() => {
     signIn(ann);
+  });
+
+  test('opens the page from Not Started', async () => {
     serveLeaderboard([]);
     const user = userEvent.setup();
     renderApp();
+
+    await openAccountMenu(user);
 
     await user.click(screen.getByRole('link', { name: 'Record' }));
 
@@ -70,13 +62,13 @@ describe('the header Record link', () => {
   });
 
   test('opens the page from Paused', async () => {
-    signIn(ann);
     serveLeaderboard([]);
     const user = userEvent.setup();
     renderApp();
 
     await user.click(screen.getByRole('button', { name: 'Start' }));
     await user.click(screen.getByRole('button', { name: 'Pause' }));
+    await openAccountMenu(user);
     await user.click(screen.getByRole('link', { name: 'Record' }));
 
     expect(await recordForm()).toBeInTheDocument();
@@ -88,6 +80,7 @@ describe('the header Record link', () => {
     renderApp();
 
     await user.click(screen.getByRole('button', { name: 'Start' }));
+    await openAccountMenu(user);
 
     expect(screen.queryByRole('link', { name: 'Record' })).not.toBeInTheDocument();
     expect(screen.getByText('Record')).toHaveAttribute('title', LEAVING_LOCKED_HINT);
@@ -101,15 +94,18 @@ describe('the header Record link', () => {
     await user.click(screen.getByRole('button', { name: 'Start' }));
     await user.click(screen.getByRole('button', { name: 'Pause' }));
     await user.click(screen.getByRole('button', { name: 'Take Break' }));
+    await openAccountMenu(user);
 
     expect(screen.queryByRole('link', { name: 'Record' })).not.toBeInTheDocument();
     expect(screen.getByText('Record')).toHaveAttribute('title', LEAVING_LOCKED_HINT);
   });
 
   test('the Record page links back to the timer and the Leaderboard', async () => {
+    const user = userEvent.setup();
     renderApp('/tournaments/new');
+    await openAccountMenu(user);
 
-    expect(await screen.findByRole('link', { name: 'Timer' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Timer' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: 'Leaderboard' })).toHaveAttribute('href', '/leaderboard');
     expect(screen.queryByRole('link', { name: 'Record' })).not.toBeInTheDocument();
   });

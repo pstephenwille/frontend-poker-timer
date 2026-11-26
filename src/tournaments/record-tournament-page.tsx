@@ -26,9 +26,9 @@ function RecordTournamentContent() {
 /** Only a signed-in Member can record, so a signed-out visitor is sent to sign in and brought back to this same URL. */
 export function RecordTournamentPage() {
   return (
-    <main className="record-tournament-page">
+    <section className="record-tournament-page">
       <h1>Record a Tournament</h1>
       <RecordTournamentContent />
-    </main>
+    </section>
   );
 }

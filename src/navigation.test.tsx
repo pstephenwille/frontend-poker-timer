@@ -1,8 +1,10 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, test } from 'vitest';
+import { me } from '@pstephenwille/poker-timer-contracts/fixtures';
+import { beforeEach, describe, expect, test } from 'vitest';
 import { leaderboardEntry } from './testing/leaderboard-entries';
-import { serveLeaderboard } from './testing/fake-backend';
+import { openAccountMenu } from './testing/account-menu';
+import { serveLeaderboard, signIn } from './testing/fake-backend';
 import { renderApp } from './testing/render-app';
 
 const LEAVING_LOCKED_HINT = 'Pause the game to leave the timer';
@@ -14,14 +16,22 @@ const ann = leaderboardEntry('Ann', { rank: 1, wins: 2, latestWinningHand: 'flus
 const championCard = () => screen.findByRole('region', { name: 'Reigning Champion' });
 
 describe('leaving the timer', () => {
+  beforeEach(() => {
+    signIn(me);
+  });
+
   test('the header links to the Leaderboard and back to the timer', async () => {
     serveLeaderboard([ann]);
     const user = userEvent.setup();
     renderApp();
 
+    await openAccountMenu(user);
+
     await user.click(screen.getByRole('link', { name: 'Leaderboard' }));
     expect(await screen.findByRole('table', { name: 'Leaderboard' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Start' })).not.toBeInTheDocument();
+
+    await openAccountMenu(user);
 
     await user.click(screen.getByRole('link', { name: 'Timer' }));
     expect(screen.getByRole('button', { name: 'Start' })).toBeVisible();
@@ -34,6 +44,7 @@ describe('leaving the timer', () => {
     await championCard();
 
     await user.click(screen.getByRole('button', { name: 'Start' }));
+    await openAccountMenu(user);
 
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getByText('Leaderboard')).toHaveAttribute('title', LEAVING_LOCKED_HINT);
@@ -48,6 +59,7 @@ describe('leaving the timer', () => {
     await user.click(screen.getByRole('button', { name: 'Start' }));
     await user.click(screen.getByRole('button', { name: 'Pause' }));
     await user.click(screen.getByRole('button', { name: 'Take Break' }));
+    await openAccountMenu(user);
 
     expect(screen.queryByRole('link', { name: 'Leaderboard' })).not.toBeInTheDocument();
     expect(screen.getByText('Leaderboard')).toHaveAttribute('title', LEAVING_LOCKED_HINT);
@@ -62,8 +74,11 @@ describe('leaving the timer', () => {
     await screen.findByText(ONE_SECOND_INTO_THE_LEVEL, {}, CLOCK_TICK_WAIT);
     await user.click(screen.getByRole('button', { name: 'Pause' }));
 
+    await openAccountMenu(user);
+
     await user.click(screen.getByRole('link', { name: 'Leaderboard' }));
     await screen.findByRole('table', { name: 'Leaderboard' });
+    await openAccountMenu(user);
     await user.click(screen.getByRole('link', { name: 'Timer' }));
 
     expect(screen.getByText(ONE_SECOND_INTO_THE_LEVEL)).toBeVisible();
@@ -78,8 +93,10 @@ describe('leaving the timer', () => {
 
     await user.click(screen.getByRole('button', { name: 'Start' }));
     await user.click(screen.getByRole('button', { name: 'Pause' }));
+    await openAccountMenu(user);
     await user.click(screen.getByRole('link', { name: 'Leaderboard' }));
     await user.keyboard(' ');
+    await openAccountMenu(user);
     await user.click(screen.getByRole('link', { name: 'Timer' }));
 
     expect(screen.getByRole('button', { name: 'Start' })).toBeVisible();
@@ -92,7 +109,9 @@ describe('leaving the timer', () => {
     expect(within(await championCard()).getByText('No winner yet')).toBeInTheDocument();
 
     serveLeaderboard([ann]);
+    await openAccountMenu(user);
     await user.click(screen.getByRole('link', { name: 'Leaderboard' }));
+    await openAccountMenu(user);
     await user.click(screen.getByRole('link', { name: 'Timer' }));
 
     expect(within(await championCard()).getByText('Ann')).toBeInTheDocument();
